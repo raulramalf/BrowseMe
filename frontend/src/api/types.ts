@@ -31,6 +31,13 @@ export interface Issue {
   evidence: string
   limitation: string
   recommendation: string
+  /** Puntos (0 a 10) que subiría la nota global si se corrigiera este hallazgo. */
+  scoreGain: number
+  /** Guía fija del backend: por qué importa y qué hacer. No describe la página. */
+  why: string
+  steps: string[]
+  /** Influye directamente en que lleguen clientes. */
+  affectsClients: boolean
 }
 
 export interface PageSummary {

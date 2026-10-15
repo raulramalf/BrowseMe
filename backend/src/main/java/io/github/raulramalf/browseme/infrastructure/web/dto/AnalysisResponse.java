@@ -65,8 +65,15 @@ public record AnalysisResponse(
     public record ImagesDto(int total, int withAlt, int decorative, int missingAlt) {
     }
 
+    /**
+     * @param scoreGain     puntos (0 a 10) que subiría la nota global si se corrigiera este hallazgo
+     * @param why           por qué importa (texto fijo de la guía, no dato de la página)
+     * @param steps         pasos concretos para corregirlo (texto fijo de la guía)
+     * @param affectsClients influye directamente en que lleguen clientes
+     */
     public record IssueDto(String ruleId, String category, String severity, String area, String title,
-                           String evidence, String limitation, String recommendation) {
+                           String evidence, String limitation, String recommendation, double scoreGain,
+                           String why, List<String> steps, boolean affectsClients) {
     }
 
     /** {@code status} es AVAILABLE, UNAVAILABLE o INVALID_OUTPUT; el resto es null si no hay IA. */

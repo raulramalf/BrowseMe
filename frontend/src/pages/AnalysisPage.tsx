@@ -1,6 +1,7 @@
 import { useParams } from 'react-router'
 import { AiSection } from '../components/AiSection'
 import { ErrorPanel } from '../components/ErrorPanel'
+import { GrowthPlan } from '../components/GrowthPlan'
 import { IssueList } from '../components/IssueList'
 import { formatDate } from '../components/labels'
 import { Limitations } from '../components/Limitations'
@@ -64,6 +65,8 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
       )}
 
       {!failed && analysis.score && <ScoreCard score={analysis.score} />}
+
+      {!failed && analysis.score && <GrowthPlan issues={analysis.issues} summary={analysis.pageSummary} />}
 
       {hasFacts && (
         <section className="panel panel-facts" aria-labelledby="verificado-titulo">

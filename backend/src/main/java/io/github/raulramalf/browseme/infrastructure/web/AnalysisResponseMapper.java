@@ -8,6 +8,7 @@ import io.github.raulramalf.browseme.domain.page.DesignSignals;
 import io.github.raulramalf.browseme.domain.page.EngagementSignals;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
 import io.github.raulramalf.browseme.domain.page.VisualCheck;
+import io.github.raulramalf.browseme.domain.page.VisualStatus;
 import io.github.raulramalf.browseme.domain.page.VisualMetrics;
 import io.github.raulramalf.browseme.domain.score.ScoreCalculator;
 import io.github.raulramalf.browseme.domain.score.ScoreCard;
@@ -52,7 +53,7 @@ final class AnalysisResponseMapper {
                 analysis.completedAt().orElse(null),
                 analysis.expiresAt(),
                 analysis.snapshot().map(AnalysisResponseMapper::summary).orElse(null),
-                analysis.issues().stream().map(AnalysisResponseMapper::issue).toList(),
+                issues(analysis),
                 counts,
                 score(analysis),
                 ai(analysis),
@@ -113,9 +114,23 @@ final class AnalysisResponseMapper {
                 v.desktopScreenshot() != null);
     }
 
-    private static IssueDto issue(SeoIssue issue) {
+    private static List<IssueDto> issues(WebsiteAnalysis analysis) {
+        List<SeoIssue> issues = analysis.issues();
+        VisualStatus visual = analysis.snapshot().map(s -> s.visual().status()).orElse(VisualStatus.NOT_RUN);
+        int current = ScoreCalculator.calculate(issues, visual).tenths();
+        return issues.stream().map(issue -> {
+            List<SeoIssue> without = issues.stream().filter(other -> other != issue).toList();
+            // Puntos exactos que se ganarían al corregir solo este hallazgo (mismo cálculo que la nota).
+            double gain = (ScoreCalculator.calculate(without, visual).tenths() - current) / 10.0;
+            return issue(issue, gain);
+        }).toList();
+    }
+
+    private static IssueDto issue(SeoIssue issue, double scoreGain) {
+        RuleGuides.Guide guide = RuleGuides.of(issue.ruleId());
         return new IssueDto(issue.ruleId().name(), issue.category().name(), issue.severity().name(),
-                issue.area().name(), RuleTitles.of(issue.ruleId()), issue.evidence(), issue.limitation(), issue.recommendation());
+                issue.area().name(), RuleTitles.of(issue.ruleId()), issue.evidence(), issue.limitation(),
+                issue.recommendation(), scoreGain, guide.why(), guide.steps(), guide.clients());
     }
 
     private static AiDto ai(WebsiteAnalysis analysis) {

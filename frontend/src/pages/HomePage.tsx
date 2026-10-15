@@ -94,23 +94,27 @@ export function HomePage() {
             <span className="preview-address">browseme · informe</span>
           </div>
           <div className="preview-body" aria-hidden="true">
-            <span className="preview-eyebrow">Verificado por reglas</span>
-            <div className="preview-counts">
-              <span className="sev-high">Alta</span>
-              <span className="sev-medium">Media</span>
-              <span className="sev-low">Baja</span>
+            <div className="preview-score">
+              <span className="preview-score-number">6,5</span>
+              <span className="preview-score-max">de 10</span>
+              <div className="preview-areas">
+                <span>SEO <b>7,0</b></span>
+                <span>Captación <b>5,5</b></span>
+                <span>Diseño <b>8,5</b></span>
+              </div>
             </div>
-            <div className="preview-issue sev-border-high">
-              <strong>La página no usa HTTPS</strong>
-              <span>Evidencia: la página se sirve por HTTP</span>
+            <span className="preview-eyebrow">Cómo conseguir más clientes</span>
+            <div className="preview-issue sev-border-medium">
+              <strong>1. No hay forma directa de contacto <i>+1,2 puntos</i></strong>
+              <span>Pon tu teléfono pulsable y un botón de WhatsApp arriba</span>
             </div>
             <div className="preview-issue sev-border-medium">
-              <strong>Falta la metadescripción</strong>
-              <span>Evidencia: no hay etiqueta description</span>
+              <strong>2. Falta una llamada a la acción <i>+0,6 puntos</i></strong>
+              <span>Elige UNA acción principal: «Reserva», «Pide presupuesto»</span>
             </div>
             <div className="preview-ai">
               <span className="badge badge-ai">IA · No verificada</span>
-              <span>Empieza por activar HTTPS con tu proveedor…</span>
+              <span>Empieza por el teléfono: es lo que más clientes te hace perder…</span>
             </div>
           </div>
           <figcaption>Ejemplo ilustrativo de informe</figcaption>

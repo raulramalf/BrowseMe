@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import type { Area, Issue, Severity } from '../api/types'
-import { AREA_LABEL, CATEGORY_LABEL, SEVERITY_LABEL } from './labels'
+import { AREA_LABEL, CATEGORY_LABEL, formatGain, SEVERITY_LABEL } from './labels'
 
 type Filter = 'ALL' | Severity
 type AreaFilter = 'ALL' | Area
@@ -52,11 +52,21 @@ export function IssueList({ issues }: { issues: Issue[] }) {
               <h3>{issue.title}</h3>
               <p className="issue-meta">
                 <span className={`badge sev-${issue.severity.toLowerCase()}`}>Severidad {SEVERITY_LABEL[issue.severity].toLowerCase()}</span>
+                {issue.scoreGain > 0 && <span className="badge badge-gain">{formatGain(issue.scoreGain)} puntos</span>}
                 <span className="badge badge-neutral">{AREA_LABEL[issue.area]}</span>
                 <span className="badge badge-neutral">{CATEGORY_LABEL[issue.category]}</span>
                 <code>{issue.ruleId}</code>
               </p>
               <p>{issue.recommendation}</p>
+              <details>
+                <summary>Cómo corregirlo</summary>
+                <p className="issue-why">{issue.why}</p>
+                <ul className="issue-steps">
+                  {issue.steps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ul>
+              </details>
               <details>
                 <summary>Ver evidencia y limitaciones</summary>
                 <dl>

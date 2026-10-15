@@ -86,3 +86,16 @@ Pedido por el propietario; respuestas a las preguntas de diseño:
   aparte.
 - Los análisis guardados antes de la 1.1 se siguen leyendo: los campos nuevos
   toman valores por defecto.
+
+## Versión 1.1.1: consejos que no dependen de la IA (2026-10-15)
+
+- Motivo: con la 1.1, sin Ollama instalado el informe solo decía «falta X» y el
+  consejo de cómo captar clientes dependía de la IA. Ahora cada hallazgo lleva una
+  **guía fija** (`RuleGuides`: por qué importa y pasos concretos) y los **puntos
+  exactos** que sumaría corregirlo (`scoreGain`, recalculando la nota sin ese hallazgo).
+- La guía es conocimiento general escrito en el código, no un dato de la página ni
+  salida de la IA; los hechos siguen saliendo de las reglas. La IA solo añade una
+  explicación y prioriza.
+- El informe tiene una sección «Cómo conseguir más clientes» con los hallazgos que
+  influyen en captar clientes (`affectsClients`), ordenados por puntos ganables, y
+  «Ya lo estás haciendo bien» con las señales detectadas. La portada muestra la nota.

@@ -53,8 +53,9 @@ describe('AnalysisPage', () => {
 
     await userEvent.selectOptions(await screen.findByLabelText('Mostrar'), 'MEDIUM')
 
-    expect(screen.queryByText('La página no usa HTTPS')).not.toBeInTheDocument()
-    expect(screen.getByText('Falta la metadescripción')).toBeInTheDocument()
+    const facts = screen.getByRole('region', { name: /Verificado por reglas/ })
+    expect(within(facts).queryByText('La página no usa HTTPS')).not.toBeInTheDocument()
+    expect(within(facts).getByText('Falta la metadescripción')).toBeInTheDocument()
   })
 
   it('shows a partial report when the AI is unavailable', async () => {
@@ -69,7 +70,10 @@ describe('AnalysisPage', () => {
     renderPage()
 
     expect(await screen.findByText(/no está disponible para este análisis/)).toBeInTheDocument()
-    expect(screen.getByText('La página no usa HTTPS')).toBeInTheDocument()
+    const facts = screen.getByRole('region', { name: /Verificado por reglas/ })
+    expect(within(facts).getByText('La página no usa HTTPS')).toBeInTheDocument()
+    // El plan para conseguir clientes no depende de la IA.
+    expect(screen.getByRole('region', { name: 'Cómo conseguir más clientes' })).toBeInTheDocument()
   })
 
   it('explains failed analyses with the server message', async () => {
@@ -122,6 +126,10 @@ describe('AnalysisPage', () => {
               evidence: `El título tiene 90 caracteres: «${hostile}».`,
               limitation: '',
               recommendation: 'Acorta el título.',
+              scoreGain: 0.2,
+              why: 'Se corta en Google.',
+              steps: ['Resume en 65 caracteres.'],
+              affectsClients: false,
             },
           ],
           ai: { status: 'AVAILABLE', summary: hostile, strengths: [hostile], opportunities: [], recommendations: [], actionPlan: [] },
@@ -196,6 +204,10 @@ describe('AnalysisPage', () => {
             evidence: 'Sin teléfono ni email.',
             limitation: '',
             recommendation: 'Añade un teléfono.',
+            scoreGain: 0.45,
+            why: 'Si contactar cuesta, el cliente se va.',
+            steps: ['Pon tu teléfono en la cabecera.'],
+            affectsClients: true,
           },
         ],
       }),
@@ -204,8 +216,83 @@ describe('AnalysisPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: /Captación y fidelización \(1\)/ }))
 
-    expect(screen.getByText('No hay una forma directa de contacto')).toBeInTheDocument()
-    expect(screen.queryByText('La página no usa HTTPS')).not.toBeInTheDocument()
+    const facts = screen.getByRole('region', { name: /Verificado por reglas/ })
+    expect(within(facts).getByText('No hay una forma directa de contacto')).toBeInTheDocument()
+    expect(within(facts).queryByText('La página no usa HTTPS')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Captación y fidelización/ })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('gives a customer plan without AI, ordered by the points each fix adds', async () => {
+    const base = completedAnalysis()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      jsonResponse({
+        ...base,
+        status: 'COMPLETED_WITHOUT_AI',
+        ai: { status: 'UNAVAILABLE', summary: null, strengths: [], opportunities: [], recommendations: [], actionPlan: [] },
+        issues: [
+          ...base.issues,
+          {
+            ruleId: 'CONTACT_MISSING',
+            category: 'EDITORIAL',
+            severity: 'MEDIUM',
+            area: 'ENGAGEMENT',
+            title: 'No hay una forma directa de contacto',
+            evidence: 'Sin teléfono ni email.',
+            limitation: '',
+            recommendation: 'Añade un teléfono.',
+            scoreGain: 0.45,
+            why: 'Si contactar cuesta, el cliente se va.',
+            steps: ['Pon tu teléfono en la cabecera.', 'Añade un botón de WhatsApp.'],
+            affectsClients: true,
+          },
+          {
+            ruleId: 'TITLE_LENGTH',
+            category: 'EDITORIAL',
+            severity: 'LOW',
+            area: 'SEO',
+            title: 'Longitud del título mejorable',
+            evidence: 'Corto.',
+            limitation: '',
+            recommendation: 'Alarga el título.',
+            scoreGain: 0.2,
+            why: 'Se corta en Google.',
+            steps: ['Resume en 65 caracteres.'],
+            affectsClients: false,
+          },
+        ],
+      }),
+    )
+    renderPage()
+
+    const plan = await screen.findByRole('region', { name: 'Cómo conseguir más clientes' })
+    const items = within(plan).getAllByRole('listitem').filter((li) => li.classList.contains('growth-item'))
+    // Mayor ganancia primero (HTTPS +1,2; metadescripción +0,6; contacto +0,5) y sin los que no influyen en clientes.
+    expect(items.map((li) => within(li).getByRole('heading', { level: 3 }).textContent)).toEqual([
+      'La página no usa HTTPS',
+      'Falta la metadescripción',
+      'No hay una forma directa de contacto',
+    ])
+    expect(within(plan).getByText('+1,2 puntos')).toBeInTheDocument()
+    expect(within(plan).getByText('Añade un botón de WhatsApp.')).toBeInTheDocument()
+    expect(within(plan).queryByText('Longitud del título mejorable')).not.toBeInTheDocument()
+  })
+
+  it('lists what the page already does well from the detected signals', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(completedAnalysis()))
+    renderPage()
+
+    const plan = await screen.findByRole('region', { name: 'Cómo conseguir más clientes' })
+    expect(within(plan).getByText('Ya lo estás haciendo bien')).toBeInTheDocument()
+    expect(within(plan).getByText('Tienes un teléfono pulsable')).toBeInTheDocument()
+    expect(within(plan).getByText('Enlazas tus redes (instagram)')).toBeInTheDocument()
+  })
+
+  it('shows how to fix each finding and the points it adds', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(completedAnalysis()))
+    renderPage()
+
+    const facts = await screen.findByRole('region', { name: /Verificado por reglas/ })
+    expect(within(facts).getAllByText('Cómo corregirlo')).toHaveLength(2)
+    expect(within(facts).getByText('+1,2 puntos')).toBeInTheDocument()
   })
 })

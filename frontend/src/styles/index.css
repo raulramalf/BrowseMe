@@ -1577,3 +1577,153 @@ code.cmd {
     max-width: 280px;
   }
 }
+
+/* ---------- Plan para conseguir clientes ---------- */
+.growth-note {
+  margin: 0 0 var(--spacing-24);
+  max-width: 720px;
+  color: var(--on-dark-muted);
+  font-size: var(--text-body-sm);
+}
+
+.growth-list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.growth-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline-dark);
+  border-radius: var(--radius-cards);
+  padding: var(--spacing-24);
+}
+
+.growth-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.growth-head h3 {
+  margin: 0;
+  flex: 1 1 240px;
+  font-size: 20px;
+}
+
+.growth-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-small);
+  background: var(--color-neon-pulse);
+  color: var(--color-obsidian-shell);
+  font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+}
+
+.badge-gain {
+  background: var(--color-neon-pulse);
+  color: var(--color-obsidian-shell);
+  font-variant-numeric: tabular-nums;
+}
+
+.growth-why {
+  margin: var(--spacing-16) 0 var(--spacing-8);
+  color: var(--on-dark-muted);
+}
+
+.growth-steps {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.growth-steps li {
+  margin-bottom: 6px;
+}
+
+.growth-meta {
+  margin: var(--spacing-16) 0 0;
+  font-size: 13px;
+  color: var(--on-dark-muted);
+  overflow-wrap: anywhere;
+}
+
+.growth-good {
+  margin-top: var(--spacing-32);
+  padding-top: var(--spacing-24);
+  border-top: 1px solid var(--hairline-dark);
+}
+
+.growth-good h3 {
+  margin-top: 0;
+}
+
+.issue-why {
+  margin: 8px 0;
+  color: var(--color-graphite-fill);
+}
+
+.issue-steps {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  color: var(--color-graphite-fill);
+}
+
+.badge-gain {
+  font-weight: 500;
+}
+
+/* Nota dentro de la vista de ejemplo de la portada */
+.preview-score {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'num areas' 'max areas';
+  column-gap: var(--spacing-24);
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline-light-strong);
+}
+
+.preview-score-number {
+  grid-area: num;
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-obsidian-shell);
+}
+
+.preview-score-max {
+  grid-area: max;
+  font-size: 13px;
+  color: var(--color-graphite-fill);
+}
+
+.preview-areas {
+  grid-area: areas;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.preview-areas span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.preview-issue i {
+  font-style: normal;
+  font-size: 12px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-neon-pulse);
+  color: var(--color-obsidian-shell);
+  white-space: nowrap;
+}

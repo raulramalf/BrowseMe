@@ -84,6 +84,11 @@ class AnalysisApiTest {
                 .andExpect(jsonPath("$.ai.status").value("AVAILABLE"))
                 .andExpect(jsonPath("$.ai.summary", containsString("IA simulada")))
                 .andExpect(jsonPath("$.issues[0].area").value("SEO"))
+                // Corregir HTTPS sube la nota 3 × 0,4 = 1,2 puntos; la guía y los pasos vienen del backend.
+                .andExpect(jsonPath("$.issues[0].scoreGain").value(1.2))
+                .andExpect(jsonPath("$.issues[0].affectsClients").value(true))
+                .andExpect(jsonPath("$.issues[0].why").isString())
+                .andExpect(jsonPath("$.issues[0].steps[0]").isString())
                 // SEO 10 - 3 (HTTPS) = 7; global 7 × 0,4 + 10 × 0,3 + 10 × 0,3 = 8,8.
                 .andExpect(jsonPath("$.score.value").value(8.8))
                 .andExpect(jsonPath("$.score.areas[0].value").value(7.0))

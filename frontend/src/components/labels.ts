@@ -32,6 +32,11 @@ export const VISUAL_STATUS_LABEL: Record<VisualStatus, string> = {
   NOT_RUN: 'No realizado',
 }
 
+/** Puntos ganables con un decimal y signo: 1.2 -> «+1,2». */
+export function formatGain(value: number): string {
+  return `+${value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`
+}
+
 /** Número con coma decimal y una cifra: 7.6 -> «7,6». */
 export function formatScore(value: number): string {
   return value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
