@@ -48,7 +48,10 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       <footer className="site-footer">
         <div className="container footer-inner">
-          <p>BrowseMe es un proyecto open source. El análisis es automático y no garantiza resultados SEO.</p>
+          <p>
+            BrowseMe es un proyecto open source. El análisis es automático y no garantiza resultados SEO.{' '}
+            {!isPublicSite() && <span className="version">Versión {__APP_VERSION__}</span>}
+          </p>
           <nav aria-label="Legal">
             <ul className="nav-list">
               <li>

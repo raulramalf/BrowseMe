@@ -63,6 +63,15 @@ class LocalProfileTest {
     }
 
     @Test
+    void pages_are_never_served_from_a_stale_browser_cache() throws Exception {
+        mvc.perform(get("/")).andExpect(header().string("Cache-Control", "no-cache"));
+        mvc.perform(get("/analizar")).andExpect(header().string("Cache-Control", "no-cache"));
+        // Los archivos con hash en el nombre sí se pueden guardar para siempre.
+        mvc.perform(get("/assets/index-abc123.js"))
+                .andExpect(header().string("Cache-Control", "public, max-age=31536000, immutable"));
+    }
+
+    @Test
     void keeps_the_strict_csp_on_the_api() throws Exception {
         mvc.perform(get("/api/v1/analyses/00000000-0000-0000-0000-000000000000"))
                 .andExpect(header().string("Content-Security-Policy", SecurityHeadersFilter.API_CSP));

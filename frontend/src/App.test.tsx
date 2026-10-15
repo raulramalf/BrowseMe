@@ -44,6 +44,11 @@ describe('App routes', () => {
     expect(screen.getByRole('button', { name: 'Analizar' })).toBeInTheDocument()
   })
 
+  it('shows the app version in the footer so users can tell which copy they run', () => {
+    renderAt('/')
+    expect(screen.getByText(/^Versión \d+\.\d+\.\d+/)).toBeInTheDocument()
+  })
+
   it('has a skip link and labelled navigation', () => {
     renderAt('/')
     expect(screen.getByRole('link', { name: 'Saltar al contenido' })).toHaveAttribute('href', '#contenido')

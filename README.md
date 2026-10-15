@@ -78,6 +78,11 @@ persona con el perfil `local`:
 
 - Escucha solo en `http://127.0.0.1:8765` (cambia el puerto con `BROWSEME_PORT`)
   y abre el navegador al arrancar (`BROWSEME_OPEN_BROWSER=false` para evitarlo).
+  Si el puerto está ocupado (normalmente por otra copia que sigue abierta, quizá
+  una versión anterior) avisa y usa el siguiente libre (8766…), en lugar de fallar.
+- La versión se ve en el pie de la web de la app; las páginas se sirven con
+  `Cache-Control: no-cache` para que una actualización no muestre la pantalla vieja
+  desde la caché del navegador.
 - Informes en memoria mientras la app está abierta; sin PostgreSQL.
 - IA con el Ollama local (`ollama pull llama3.2:3b`). Si Ollama no está, el
   informe sale con los hallazgos verificados y sin interpretación.

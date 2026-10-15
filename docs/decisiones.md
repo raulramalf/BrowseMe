@@ -99,3 +99,12 @@ Pedido por el propietario; respuestas a las preguntas de diseño:
 - El informe tiene una sección «Cómo conseguir más clientes» con los hallazgos que
   influyen en captar clientes (`affectsClients`), ordenados por puntos ganables, y
   «Ya lo estás haciendo bien» con las señales detectadas. La portada muestra la nota.
+
+## Versión 1.1.2: actualizar la app de escritorio sin sorpresas (2026-10-15)
+
+- Problema: tras actualizar, el usuario seguía viendo la versión anterior. Causas
+  posibles: una copia vieja aún abierta en el puerto 8765 (la nueva no podía arrancar
+  y no avisaba) y el navegador mostrando `index.html` desde su caché.
+- Solución: `PortSelector` elige el siguiente puerto libre y avisa por consola;
+  las páginas llevan `Cache-Control: no-cache` (los `/assets/` con hash, `immutable`);
+  el pie muestra la versión (`VERSION`, fijada al compilar con `__APP_VERSION__`).

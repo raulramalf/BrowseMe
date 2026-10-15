@@ -32,6 +32,12 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         boolean page = !path.startsWith("/api/") && !path.startsWith("/actuator");
         response.setHeader("Content-Security-Policy", page ? PAGE_CSP : API_CSP);
+        if (page) {
+            // Sin esto el navegador puede seguir mostrando la pantalla de una versión anterior desde su
+            // caché aunque el programa sea nuevo. Los archivos con hash en el nombre sí son inmutables.
+            response.setHeader("Cache-Control", path.startsWith("/assets/")
+                    ? "public, max-age=31536000, immutable" : "no-cache");
+        }
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Referrer-Policy", "no-referrer");
         response.setHeader("X-Frame-Options", "DENY");

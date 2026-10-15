@@ -1727,3 +1727,9 @@ code.cmd {
   color: var(--color-obsidian-shell);
   white-space: nowrap;
 }
+
+.site-footer .version {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
