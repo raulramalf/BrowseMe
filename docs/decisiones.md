@@ -9,7 +9,7 @@ Fecha: 2026-10-15
 | 4 | Retención | 7 días |
 | 6 | Modelo de Ollama | `llama3.2:3b` por defecto (configurable por variable de entorno) |
 | 7 | Licencia | Apache 2.0 |
-| 11 | Despliegue | Solo local |
+| 11 | Despliegue | Local con Docker Compose; además, publicación gratuita opcional (Vercel + Render, perfil `cloud`), pedida el 2026-10-15 |
 | — | Plazo | 1 semana (objetivo: 2026-10-22) |
 
 ## Entorno de desarrollo
@@ -48,3 +48,14 @@ sin tocar lo innegociable (SSRF, validación de salida de IA, tests del núcleo)
   buscadores). Confirmado el 2026-10-15.
 - 4xx en robots.txt equivale a «sin restricciones» (`NOT_FOUND`); 5xx, errores o
   destinos prohibidos, a `UNAVAILABLE` (RFC 9309).
+
+## Publicación gratuita (2026-10-15)
+
+- Pedido: que cualquiera pueda usar la web publicada y que el servidor sea gratis.
+- Frontend en Vercel; backend en el plan gratuito de Render (Docker, 512 MB,
+  se duerme tras 15 min). Su PostgreSQL gratuito caduca a los 30 días, así que
+  el perfil `cloud` usa el repositorio en memoria y desactiva la IA (Ollama
+  necesita varios GB de RAM). La seguridad SSRF y las reglas no cambian.
+- El frontend llama al backend por CORS (`VITE_API_BASE_URL`), no mediante un
+  reenvío de Vercel, para que el límite por IP vea la IP real del cliente y no
+  la de Vercel.

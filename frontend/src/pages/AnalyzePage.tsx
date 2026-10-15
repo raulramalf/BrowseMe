@@ -16,7 +16,12 @@ export function AnalyzePage() {
       </div>
       <ul className="analyze-notes">
         <li>
-          <strong>Tarda poco.</strong> Las comprobaciones suelen tardar segundos; la explicación con IA puede tardar un minuto.
+          <strong>Tarda poco.</strong> Las comprobaciones suelen tardar segundos. Si el servidor estaba en reposo, el
+          primer análisis puede tardar hasta un minuto en empezar.
+        </li>
+        <li>
+          <strong>Siempre con hechos.</strong> Si la explicación con IA no está disponible, verás igualmente todos los
+          hallazgos verificados por reglas.
         </li>
         <li>
           <strong>Sin registro.</strong> Recibirás un enlace al informe, disponible durante 7 días.

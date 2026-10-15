@@ -63,6 +63,36 @@ descarga el modelo (unos 2 GB); hasta que termine, los informes salen sin IA.
 docker compose up --build postgres backend frontend
 ```
 
+## Publicar gratis (Vercel + Render)
+
+Para que cualquiera pueda usar BrowseMe desde Internet sin coste: el frontend en
+Vercel y el backend en el plan gratuito de Render, con el perfil `cloud`
+(repositorio en memoria e IA desactivada; no necesita PostgreSQL ni Ollama).
+
+1. **Backend en Render**: *New → Blueprint* y elige este repositorio. Se lee
+   [render.yaml](render.yaml). Cuando lo pida, pon en `BROWSEME_ALLOWED_ORIGINS`
+   la URL pública del frontend (p. ej. `https://browseme.vercel.app`, sin barra
+   final). Al terminar, copia la URL del servicio (p. ej.
+   `https://browseme-api.onrender.com`) y comprueba `…/actuator/health`.
+2. **Frontend en Vercel**: *Root Directory* `frontend` y la variable de entorno
+   `VITE_API_BASE_URL` con la URL del backend del paso 1. Vuelve a desplegar
+   (la variable se aplica al compilar).
+3. Si cambias el dominio del frontend, actualiza `BROWSEME_ALLOWED_ORIGINS` en
+   Render.
+
+Limitaciones del plan gratuito:
+
+- El servicio se duerme tras 15 minutos sin tráfico; la primera petición
+  tarda alrededor de un minuto en despertarlo.
+- Los informes viven en memoria: se pierden al reiniciar o al dormirse el
+  servicio (el enlace dará «Informe no encontrado»).
+- Sin IA: los informes se muestran con los hallazgos verificados y sin
+  interpretación (`COMPLETED_WITHOUT_AI`).
+- Límite por IP: depende de que Render reenvíe la IP del cliente por un proxy
+  de red interna (`server.forward-headers-strategy: native`). Si no fuera así,
+  el límite se aplicaría a todos los usuarios a la vez; compruébalo tras
+  desplegar.
+
 ## Desarrollo local
 
 Requisitos: JDK 25 y Node 24. No necesitas PostgreSQL ni Ollama: el perfil
@@ -115,6 +145,8 @@ cd frontend && npm test && npm run build
 | `BROWSEME_EXECUTOR_THREADS` / `_QUEUE_CAPACITY` | `2` / `20` | Análisis simultáneos y cola |
 | `BROWSEME_WEB_SUBMITS_PER_MINUTE` | `5` | Análisis nuevos por IP y minuto |
 | `BROWSEME_WEB_READS_PER_MINUTE` | `120` | Consultas por IP y minuto |
+| `PORT` | `8080` | Puerto HTTP en el perfil `cloud` (lo fija el proveedor) |
+| `VITE_API_BASE_URL` (frontend, al compilar) | vacío | Origen del backend si se aloja aparte; vacío = mismo origen |
 | `BROWSEME_FETCH_USER_AGENT` | `BrowseMeBot/0.1 (+[COMPLETAR: URL informativa])` | User-Agent del rastreador |
 
 En Docker Compose, las de PostgreSQL e IA se toman de `.env` (ver
