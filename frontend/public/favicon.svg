@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">
+  <title>BrowseMe</title>
+  <rect width="28" height="28" rx="8" fill="#0e1a19"/>
+  <circle cx="12.5" cy="12.5" r="5.5" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M16.6 16.6 21 21" stroke="#3ddc91" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

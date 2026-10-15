@@ -12,6 +12,19 @@ las reglas. El informe separa siempre lo **verificado por reglas** de la
 > Proyecto open source (Apache 2.0) y pieza de portfolio: arquitectura
 > hexagonal, seguridad anti-SSRF, validación de la salida de IA y pruebas.
 
+## Autoría y uso de IA
+
+**Autor:** Raúl Ramírez Alfaro ([@raulramalf](https://github.com/raulramalf)),
+creador y responsable de este repositorio.
+
+**Uso de IA en el desarrollo:** se han utilizado herramientas de IA únicamente
+como **herramienta de apoyo** (por ejemplo, sugerencias de código, revisión,
+documentación o borradores). No han sido el único recurso: las decisiones de
+diseño y arquitectura, la revisión y la responsabilidad del resultado son del
+autor. No debe confundirse con la IA local (Ollama) que usa la aplicación: esa
+es una funcionalidad del producto, descrita más abajo, que solo interpreta
+hallazgos ya detectados por reglas deterministas.
+
 ## Qué hace (y qué no)
 
 | Analiza | No analiza |
