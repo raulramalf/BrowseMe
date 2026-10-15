@@ -35,3 +35,16 @@ sin tocar lo innegociable (SSRF, validación de salida de IA, tests del núcleo)
 - Se mantiene: catálogo de reglas completo, robots.txt, IA con validación,
   API asíncrona, Postgres + Flyway, frontend con estados, páginas legales,
   Docker Compose, README, CI básico.
+
+## robots.txt (implementado en la funcionalidad del fetcher)
+
+- El estado que se muestra en el informe (`ROBOTS_TXT_BLOCKS`) se calcula para
+  **Googlebot** (con `*` como alternativa), porque es lo que importa para el SEO.
+- **Respeto**: si robots.txt nombra expresamente a `BrowseMeBot` y le prohíbe la
+  URL, no se descarga la página y el análisis termina con `ROBOTS_DISALLOWED`.
+  Una prohibición genérica (`User-agent: *`) se **informa** pero no detiene el
+  análisis: es una comprobación puntual pedida por el usuario, no un rastreo
+  (el mismo criterio que siguen las herramientas de prueba bajo demanda de los
+  buscadores). Confirmado el 2026-10-15.
+- 4xx en robots.txt equivale a «sin restricciones» (`NOT_FOUND`); 5xx, errores o
+  destinos prohibidos, a `UNAVAILABLE` (RFC 9309).

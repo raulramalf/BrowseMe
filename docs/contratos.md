@@ -20,7 +20,8 @@ public final class UrlPolicy {
 // domain.page   (sin HTML crudo; textos truncados a un máximo fijo)
 public record PageSnapshot(
     URI requestedUrl, URI finalUrl, int httpStatus, int redirectCount,
-    String title, String metaDescription, String lang, URI canonical,
+    String title, String metaDescription, String lang,
+    String canonical,                      // href absoluto tal cual; puede no ser una URI válida
     Set<String> robotsDirectives,          // de <meta name="robots"> y X-Robots-Tag, en minúsculas
     List<Heading> headings,                // Heading(int level, String text), máx. 200
     LinkStats links,                       // LinkStats(int internal, int external)
@@ -59,7 +60,8 @@ public enum AnalysisStatus { PENDING, FETCHING, ANALYZING, INTERPRETING,
 public enum AiStatus { AVAILABLE, UNAVAILABLE, INVALID_OUTPUT }
 public enum AnalysisErrorCode { URL_REJECTED, DNS_FAILURE, CONNECTION_FAILED, TIMEOUT,
                                 BODY_TOO_LARGE, UNSUPPORTED_CONTENT_TYPE, TOO_MANY_REDIRECTS,
-                                HTTP_ERROR, INTERRUPTED, INTERNAL_ERROR }
+                                INVALID_REDIRECT, HTTP_ERROR, ROBOTS_DISALLOWED,
+                                INTERRUPTED, INTERNAL_ERROR }
 
 public enum Priority { HIGH, MEDIUM, LOW }
 public record Recommendation(String text, Priority priority, Set<RuleId> ruleIds,
