@@ -10,6 +10,11 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className="site-header">
         <div className="container header-inner">
           <Link to="/" className="brand">
+            <svg className="brand-mark" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+              <rect width="28" height="28" rx="8" fill="#0e1a19" />
+              <circle cx="12.5" cy="12.5" r="5.5" fill="none" stroke="#ffffff" strokeWidth="2" />
+              <path d="M16.6 16.6 21 21" stroke="#3ddc91" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
             BrowseMe
           </Link>
           <nav aria-label="Principal">

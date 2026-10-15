@@ -7,7 +7,7 @@ const STEPS: AnalysisStatus[] = ['PENDING', 'FETCHING', 'ANALYZING', 'INTERPRETI
 export function StatusView({ status, url }: { status: AnalysisStatus; url: string | null }) {
   const current = STEPS.indexOf(status)
   return (
-    <section className="panel" aria-labelledby="progreso-titulo">
+    <section className="panel-dark" aria-labelledby="progreso-titulo">
       <h1 id="progreso-titulo">Analizando{url ? ':' : '…'}</h1>
       {url && <p className="url-text">{url}</p>}
       <p role="status" aria-live="polite" className="status-line">

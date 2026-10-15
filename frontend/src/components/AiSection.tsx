@@ -21,8 +21,8 @@ function TextList({ title, items }: { title: string; items: string[] }) {
  */
 export function AiSection({ ai }: { ai: AiResult | null }) {
   return (
-    <section className="panel panel-ai" aria-labelledby="ia-titulo">
-      <h2 id="ia-titulo">
+    <section className="panel-dark panel-ai" aria-labelledby="ia-titulo">
+      <h2 id="ia-titulo" className="panel-heading">
         Interpretación de IA <span className="badge badge-ai">No verificada</span>
       </h2>
       <p className="ai-disclaimer">
