@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: browseme
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
