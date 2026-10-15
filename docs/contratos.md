@@ -41,14 +41,26 @@ atributo `alt`. Así `IMAGES_NO_ALT` no penaliza imágenes decorativas.
 public enum RuleId { TITLE_MISSING, TITLE_LENGTH, META_DESC_MISSING, ..., FETCH_HTTP_ERROR }
 public enum IssueCategory { TECHNICAL, EDITORIAL }
 public enum IssueSeverity { HIGH, MEDIUM, LOW, INFO }
-public record SeoIssue(RuleId ruleId, IssueCategory category, IssueSeverity severity,
-                       String evidence, String limitation, String recommendation) {}
+public record SeoIssue(RuleId ruleId, String evidence, String limitation, String recommendation) {
+    IssueCategory category();   // derivadas de RuleId: no pueden contradecir el catálogo
+    IssueSeverity severity();
+}
 
-public interface SeoRule { List<SeoIssue> evaluate(PageSnapshot snapshot); }
+public interface SeoRule {                      // una clase por regla en domain.seo.rules
+    RuleId id();
+    Optional<SeoIssue> evaluate(PageSnapshot snapshot);   // como mucho un hallazgo por regla;
+}                                                          // las repeticiones se resumen en la evidencia
 public final class SeoRuleEngine {
     public SeoRuleEngine(List<SeoRule> rules);
-    public List<SeoIssue> evaluate(PageSnapshot snapshot);     // función pura
+    public List<SeoIssue> evaluate(PageSnapshot snapshot);     // función pura, ordenada por severidad
 }
+```
+
+Umbrales elegidos (no venían fijados en el prompt): `THIN_CONTENT` por debajo de
+150 palabras visibles. Con `FETCH_HTTP_ERROR` (4xx/5xx) solo se informa ese
+hallazgo: una página de error no tiene contenido que evaluar.
+
+```java
 ```
 
 ### Agregado
