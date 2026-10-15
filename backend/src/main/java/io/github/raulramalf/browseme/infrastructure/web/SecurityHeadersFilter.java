@@ -8,10 +8,17 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Cabeceras de seguridad para las respuestas de la API (solo JSON). El frontend
- * las suyas las pone nginx.
+ * Cabeceras de seguridad. La API (JSON) recibe la CSP más estricta. Las páginas
+ * del frontend solo las sirve el backend en la app de escritorio (perfil
+ * {@code local}); en Docker las sirve nginx con sus propias cabeceras. Su CSP
+ * es la misma que la de nginx.
  */
 public class SecurityHeadersFilter extends OncePerRequestFilter {
+
+    static final String API_CSP = "default-src 'none'; frame-ancestors 'none'";
+    static final String PAGE_CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+            + "connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; "
+            + "frame-ancestors 'none'";
 
     private final boolean hsts;
 
@@ -22,7 +29,9 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        response.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+        String path = request.getRequestURI();
+        boolean page = !path.startsWith("/api/") && !path.startsWith("/actuator");
+        response.setHeader("Content-Security-Policy", page ? PAGE_CSP : API_CSP);
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Referrer-Policy", "no-referrer");
         response.setHeader("X-Frame-Options", "DENY");

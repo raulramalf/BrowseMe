@@ -15,19 +15,12 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Origen del backend. Vacío (por defecto) = mismo origen: nginx o el proxy de
- * Vite reenvían /api. En un alojamiento separado (frontend en Vercel, backend en
- * Render) se define VITE_API_BASE_URL al compilar, p. ej. https://browseme-api.onrender.com.
- */
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
-
 const NETWORK_ERROR = 'No se pudo contactar con el servidor. Comprueba tu conexión.'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
-    response = await fetch(API_BASE_URL + path, { ...init, headers: { Accept: 'application/json', ...init?.headers } })
+    response = await fetch(path, { ...init, headers: { Accept: 'application/json', ...init?.headers } })
   } catch {
     throw new ApiError(0, 'NETWORK_ERROR', NETWORK_ERROR)
   }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { isPublicSite } from '../site'
 import { FAQ } from './faq'
 import { useDocumentTitle } from './useDocumentTitle'
 
@@ -7,8 +8,8 @@ import { useDocumentTitle } from './useDocumentTitle'
 const STATS: [string, string][] = [
   ['1', 'Página por análisis'],
   ['0', 'Cookies de seguimiento'],
-  ['7 días', 'Y el informe se borra'],
-  ['100 %', 'Código abierto'],
+  ['100 %', 'En tu ordenador'],
+  ['Apache 2.0', 'Código abierto'],
 ]
 
 type IconName = 'evidence' | 'ai' | 'lock' | 'scale'
@@ -51,8 +52,8 @@ function Icon({ name }: { name: IconName }) {
 
 const FEATURES: [IconName, string, string, string][] = [
   ['evidence', 'Hechos', 'Hallazgos con evidencia', 'Cada problema sale de una regla fija y muestra exactamente qué se encontró en tu página.'],
-  ['ai', 'IA local', 'Explicado sin tecnicismos', 'Un modelo de IA en nuestro propio servidor traduce los hallazgos a un plan de acción claro.'],
-  ['lock', 'Privacidad', 'Sin registro ni rastreo', 'No hay cuentas, analítica ni publicidad. El informe se borra solo a los 7 días.'],
+  ['ai', 'IA local', 'Explicado sin tecnicismos', 'Un modelo de IA que se ejecuta en tu ordenador traduce los hallazgos a un plan de acción claro.'],
+  ['lock', 'Privacidad', 'Sin registro ni rastreo', 'No hay cuentas, analítica ni publicidad. Tus análisis no salen de tu ordenador.'],
   ['scale', 'Honestidad', 'Sin notas inventadas', 'No damos una puntuación arbitraria del 0 al 100: cada hallazgo indica su importancia.'],
 ]
 
@@ -60,6 +61,10 @@ const FAQ_PREVIEW = FAQ.slice(0, 4)
 
 export function HomePage() {
   useDocumentTitle('Análisis SEO para pequeños negocios')
+  const publicSite = isPublicSite()
+  const primary = publicSite
+    ? { to: '/descargar', hero: 'Descargar BrowseMe gratis', band: 'Descargar BrowseMe' }
+    : { to: '/analizar', hero: 'Analizar mi web gratis', band: 'Empezar el análisis' }
   return (
     <>
       <section className="hero" aria-labelledby="inicio-titulo">
@@ -71,8 +76,8 @@ export function HomePage() {
             sencillo. Es gratis, no necesitas registrarte y no usamos cookies de seguimiento.
           </p>
           <div className="cta-row">
-            <Link to="/analizar" className="button">
-              Analizar mi web gratis
+            <Link to={primary.to} className="button">
+              {primary.hero}
             </Link>
             <a href="#como-funciona" className="button button-ghost">
               Ver cómo funciona
@@ -164,7 +169,7 @@ export function HomePage() {
             <span className="step-number">3</span>
             <h3>Explicación con IA local</h3>
             <p>
-              Un modelo de IA que funciona en nuestro propio servidor explica y prioriza esos hallazgos. No detecta nada
+              Un modelo de IA que funciona en tu propio ordenador explica y prioriza esos hallazgos. No detecta nada
               por su cuenta y lo marcamos como interpretación.
             </p>
           </li>
@@ -216,9 +221,13 @@ export function HomePage() {
       <section className="cta-band section" aria-labelledby="cta-titulo">
         <span className="eyebrow">Gratis · Sin registro</span>
         <h2 id="cta-titulo">Descubre qué ven los buscadores de tu web</h2>
-        <p>Escribe la dirección de tu página y recibe un informe claro en pocos minutos.</p>
-        <Link to="/analizar" className="button">
-          Empezar el análisis
+        <p>
+          {publicSite
+            ? 'Descarga la app para Windows, macOS o Linux, escribe la dirección de tu página y recibe un informe claro.'
+            : 'Escribe la dirección de tu página y recibe un informe claro en pocos minutos.'}
+        </p>
+        <Link to={primary.to} className="button">
+          {primary.band}
         </Link>
         <p className="cta-note">
           El análisis es automático y orientativo. Seguir sus recomendaciones no garantiza ningún resultado en

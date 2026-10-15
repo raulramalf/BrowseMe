@@ -1,0 +1,30 @@
+# Perfil de la app de escritorio (ejecutable descargable): una sola persona en
+# su ordenador. Sin PostgreSQL (informes en memoria mientras la app esté
+# abierta) y con la IA de Ollama local si está instalada; si no responde, el
+# informe sale igualmente con los hallazgos verificados (COMPLETED_WITHOUT_AI).
+# El backend sirve también el frontend compilado (classpath:/static).
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
+      - org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+
+server:
+  # Solo accesible desde este ordenador.
+  address: 127.0.0.1
+  port: ${BROWSEME_PORT:8765}
+  # Sin proxy delante: no se confía en cabeceras X-Forwarded-*.
+  forward-headers-strategy: none
+
+browseme:
+  persistence: memory
+  ai:
+    mode: ${BROWSEME_AI_MODE:ollama}
+  web:
+    # Mismo origen: el navegador carga la página desde el propio backend.
+    allowed-origins: http://127.0.0.1:${server.port}
+  desktop:
+    open-browser: ${BROWSEME_OPEN_BROWSER:true}

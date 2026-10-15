@@ -1,6 +1,6 @@
 interface ImportMetaEnv {
-  /** Origen del backend si se aloja aparte (sin barra final). Vacío = mismo origen. */
-  readonly VITE_API_BASE_URL?: string
+  /** "true" al compilar la web informativa (Vercel): sin analizador, con descarga. */
+  readonly VITE_PUBLIC_SITE?: string
 }
 
 interface ImportMeta {

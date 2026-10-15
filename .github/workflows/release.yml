@@ -1,0 +1,118 @@
+# Empaqueta la app de escritorio (backend + frontend + Java incluido) para
+# Windows, macOS y Linux con jpackage.
+# - Al subir una etiqueta vX.Y.Z: crea la release de GitHub y adjunta los zips.
+# - A mano (workflow_dispatch): solo genera los zips como artefactos para probar.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Compilar el frontend (modo aplicación)
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          mkdir -p ../backend/src/main/resources/static
+          cp -R dist/. ../backend/src/main/resources/static/
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      # Los tests ya se ejecutan en CI; aquí solo se empaqueta.
+      - name: Compilar el backend
+        working-directory: backend
+        run: ./mvnw -B -q package -DskipTests
+
+      - name: Versión
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "app=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "app=1.0.0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Crear el ejecutable con jpackage
+        run: |
+          mkdir -p staging dist
+          cp backend/target/browseme-backend-*.jar staging/browseme.jar
+          EXTRA=()
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            # Ventana de consola: muestra la dirección y se cierra para salir.
+            EXTRA+=(--win-console)
+          fi
+          jpackage --type app-image \
+            --name BrowseMe \
+            --app-version "${{ steps.version.outputs.app }}" \
+            --vendor "BrowseMe" \
+            --description "Análisis SEO con reglas verificables e IA local" \
+            --input staging \
+            --main-jar browseme.jar \
+            --add-modules java.se,jdk.unsupported,jdk.management,jdk.zipfs,jdk.localedata,jdk.naming.dns \
+            --java-options "-Dspring.profiles.active=local" \
+            --java-options "-Djava.awt.headless=false" \
+            --java-options "-Xmx512m" \
+            --dest dist \
+            "${EXTRA[@]}"
+
+      - name: Comprimir
+        id: zip
+        run: |
+          FILE="BrowseMe-${{ matrix.platform }}.zip"
+          cd dist
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            pwsh -Command "Compress-Archive -Path BrowseMe -DestinationPath $FILE"
+          elif [[ "${{ matrix.platform }}" == "macos" ]]; then
+            ditto -c -k --keepParent BrowseMe.app "$FILE"
+          else
+            zip -qry "$FILE" BrowseMe
+          fi
+          echo "file=dist/$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Guardar como artefacto (ejecución manual)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v7
+        with:
+          name: BrowseMe-${{ matrix.platform }}
+          path: ${{ steps.zip.outputs.file }}
+          archive: false
+
+      - name: Adjuntar a la release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --title "BrowseMe $GITHUB_REF_NAME" --generate-notes 2>/dev/null \
+            || gh release view "$GITHUB_REF_NAME" > /dev/null
+          gh release upload "$GITHUB_REF_NAME" "${{ steps.zip.outputs.file }}" --clobber

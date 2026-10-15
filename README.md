@@ -63,35 +63,37 @@ descarga el modelo (unos 2 GB); hasta que termine, los informes salen sin IA.
 docker compose up --build postgres backend frontend
 ```
 
-## Publicar gratis (Vercel + Render)
+## App de escritorio (descargable)
 
-Para que cualquiera pueda usar BrowseMe desde Internet sin coste: el frontend en
-Vercel y el backend en el plan gratuito de Render, con el perfil `cloud`
-(repositorio en memoria e IA desactivada; no necesita PostgreSQL ni Ollama).
+BrowseMe se distribuye como una app para Windows, macOS (Apple Silicon) y Linux
+que incluye Java, el backend y el frontend. Se ejecuta en el ordenador de cada
+persona con el perfil `local`:
 
-1. **Backend en Render**: *New → Blueprint* y elige este repositorio. Se lee
-   [render.yaml](render.yaml). Cuando lo pida, pon en `BROWSEME_ALLOWED_ORIGINS`
-   la URL pública del frontend (p. ej. `https://browseme.vercel.app`, sin barra
-   final). Al terminar, copia la URL del servicio (p. ej.
-   `https://browseme-api.onrender.com`) y comprueba `…/actuator/health`.
-2. **Frontend en Vercel**: *Root Directory* `frontend` y la variable de entorno
-   `VITE_API_BASE_URL` con la URL del backend del paso 1. Vuelve a desplegar
-   (la variable se aplica al compilar).
-3. Si cambias el dominio del frontend, actualiza `BROWSEME_ALLOWED_ORIGINS` en
-   Render.
+- Escucha solo en `http://127.0.0.1:8765` (cambia el puerto con `BROWSEME_PORT`)
+  y abre el navegador al arrancar (`BROWSEME_OPEN_BROWSER=false` para evitarlo).
+- Informes en memoria mientras la app está abierta; sin PostgreSQL.
+- IA con el Ollama local (`ollama pull llama3.2:3b`). Si Ollama no está, el
+  informe sale con los hallazgos verificados y sin interpretación.
+- Misma protección SSRF y mismas reglas que el resto de despliegues.
 
-Limitaciones del plan gratuito:
+Los ejecutables los genera [.github/workflows/release.yml](.github/workflows/release.yml)
+con `jpackage`:
 
-- El servicio se duerme tras 15 minutos sin tráfico; la primera petición
-  tarda alrededor de un minuto en despertarlo.
-- Los informes viven en memoria: se pierden al reiniciar o al dormirse el
-  servicio (el enlace dará «Informe no encontrado»).
-- Sin IA: los informes se muestran con los hallazgos verificados y sin
-  interpretación (`COMPLETED_WITHOUT_AI`).
-- Límite por IP: depende de que Render reenvíe la IP del cliente por un proxy
-  de red interna (`server.forward-headers-strategy: native`). Si no fuera así,
-  el límite se aplicaría a todos los usuarios a la vez; compruébalo tras
-  desplegar.
+- **Publicar una versión**: `git tag v1.0.0 && git push origin v1.0.0`. Crea la
+  release de GitHub con `BrowseMe-windows.zip`, `BrowseMe-macos.zip` y
+  `BrowseMe-linux.zip`.
+- **Probar sin publicar**: ejecuta el workflow *Release* a mano en la pestaña
+  *Actions*; los zips quedan como artefactos.
+
+La app no está firmada digitalmente: Windows (SmartScreen) y macOS (Gatekeeper)
+avisan la primera vez.
+
+## Web informativa (Vercel)
+
+La web pública solo informa y enlaza a la descarga; no tiene backend. En Vercel:
+*Root Directory* `frontend`. [frontend/vercel.json](frontend/vercel.json) ya fija
+el comando de build (`npm run build:site`, que compila con `VITE_PUBLIC_SITE=true`)
+y la reescritura de rutas del SPA.
 
 ## Desarrollo local
 
@@ -145,8 +147,9 @@ cd frontend && npm test && npm run build
 | `BROWSEME_EXECUTOR_THREADS` / `_QUEUE_CAPACITY` | `2` / `20` | Análisis simultáneos y cola |
 | `BROWSEME_WEB_SUBMITS_PER_MINUTE` | `5` | Análisis nuevos por IP y minuto |
 | `BROWSEME_WEB_READS_PER_MINUTE` | `120` | Consultas por IP y minuto |
-| `PORT` | `8080` | Puerto HTTP en el perfil `cloud` (lo fija el proveedor) |
-| `VITE_API_BASE_URL` (frontend, al compilar) | vacío | Origen del backend si se aloja aparte; vacío = mismo origen |
+| `BROWSEME_PORT` | `8765` | Puerto de la app de escritorio (perfil `local`) |
+| `BROWSEME_OPEN_BROWSER` | `true` en `local` | Abre el navegador al arrancar la app de escritorio |
+| `VITE_PUBLIC_SITE` (frontend, al compilar) | vacío | `true` = web informativa sin analizador, con descarga |
 | `BROWSEME_FETCH_USER_AGENT` | `BrowseMeBot/0.1 (+[COMPLETAR: URL informativa])` | User-Agent del rastreador |
 
 En Docker Compose, las de PostgreSQL e IA se toman de `.env` (ver

@@ -1,12 +1,11 @@
 package io.github.raulramalf.browseme.infrastructure.web;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,13 +23,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Perfil {@code cloud} (alojamiento gratuito): arranca sin PostgreSQL ni Ollama,
- * analiza sin IA y acepta peticiones CORS solo desde el frontend configurado.
+ * Perfil {@code local} (app de escritorio): arranca sin PostgreSQL, sirve el
+ * frontend con su CSP de página y resuelve las rutas del SPA. La IA se
+ * desactiva aquí para no depender de un Ollama en la máquina de test.
  */
-@SpringBootTest(properties = "browseme.web.allowed-origins=https://browseme.example")
+@SpringBootTest(properties = {"browseme.ai.mode=disabled", "browseme.desktop.open-browser=false"})
 @AutoConfigureMockMvc
-@ActiveProfiles("cloud")
-class CloudProfileTest {
+@ActiveProfiles("local")
+class LocalProfileTest {
 
     @Autowired
     private MockMvc mvc;
@@ -39,7 +39,7 @@ class CloudProfileTest {
     private PageFetcher fetcher;
 
     @Test
-    void analyses_without_database_or_ai() throws Exception {
+    void analyses_in_memory_without_database() throws Exception {
         when(fetcher.fetch(any())).thenReturn(SnapshotFixture.perfect().finalUrl("http://example.com/").build());
 
         String location = mvc.perform(post("/api/v1/analyses").contentType(MediaType.APPLICATION_JSON)
@@ -49,26 +49,21 @@ class CloudProfileTest {
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> mvc.perform(get(location))
                 .andExpect(jsonPath("$.status").value("COMPLETED_WITHOUT_AI")));
-        mvc.perform(get(location)).andExpect(jsonPath("$.issues[0].ruleId").value("NOT_HTTPS"));
     }
 
     @Test
-    void allows_cors_only_from_the_configured_frontend() throws Exception {
-        mvc.perform(options("/api/v1/analyses")
-                        .header("Origin", "https://browseme.example")
-                        .header("Access-Control-Request-Method", "POST"))
+    void serves_spa_routes_with_the_page_csp() throws Exception {
+        mvc.perform(get("/analizar"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "https://browseme.example"));
-
-        mvc.perform(options("/api/v1/analyses")
-                        .header("Origin", "https://otro.example")
-                        .header("Access-Control-Request-Method", "POST"))
-                .andExpect(status().isForbidden());
+                .andExpect(forwardedUrl("/index.html"))
+                .andExpect(header().string("Content-Security-Policy", SecurityHeadersFilter.PAGE_CSP));
+        mvc.perform(get("/analisis/7c9e6679-7425-40de-944b-e07fc1f90ae7"))
+                .andExpect(forwardedUrl("/index.html"));
     }
 
     @Test
-    void sends_hsts_because_the_provider_serves_https() throws Exception {
+    void keeps_the_strict_csp_on_the_api() throws Exception {
         mvc.perform(get("/api/v1/analyses/00000000-0000-0000-0000-000000000000"))
-                .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
+                .andExpect(header().string("Content-Security-Policy", SecurityHeadersFilter.API_CSP));
     }
 }

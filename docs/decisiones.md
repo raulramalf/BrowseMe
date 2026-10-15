@@ -9,7 +9,7 @@ Fecha: 2026-10-15
 | 4 | Retención | 7 días |
 | 6 | Modelo de Ollama | `llama3.2:3b` por defecto (configurable por variable de entorno) |
 | 7 | Licencia | Apache 2.0 |
-| 11 | Despliegue | Local con Docker Compose; además, publicación gratuita opcional (Vercel + Render, perfil `cloud`), pedida el 2026-10-15 |
+| 11 | Despliegue | Local: app de escritorio descargable (perfil `local`) o Docker Compose; web informativa en Vercel (2026-10-15) |
 | — | Plazo | 1 semana (objetivo: 2026-10-22) |
 
 ## Entorno de desarrollo
@@ -49,13 +49,16 @@ sin tocar lo innegociable (SSRF, validación de salida de IA, tests del núcleo)
 - 4xx en robots.txt equivale a «sin restricciones» (`NOT_FOUND`); 5xx, errores o
   destinos prohibidos, a `UNAVAILABLE` (RFC 9309).
 
-## Publicación gratuita (2026-10-15)
+## Web informativa y app de escritorio (2026-10-15)
 
-- Pedido: que cualquiera pueda usar la web publicada y que el servidor sea gratis.
-- Frontend en Vercel; backend en el plan gratuito de Render (Docker, 512 MB,
-  se duerme tras 15 min). Su PostgreSQL gratuito caduca a los 30 días, así que
-  el perfil `cloud` usa el repositorio en memoria y desactiva la IA (Ollama
-  necesita varios GB de RAM). La seguridad SSRF y las reglas no cambian.
-- El frontend llama al backend por CORS (`VITE_API_BASE_URL`), no mediante un
-  reenvío de Vercel, para que el límite por IP vea la IP real del cliente y no
-  la de Vercel.
+- Pedido: web pública solo informativa y una app descargable que analice en el
+  ordenador de cada persona con IA local. Se descartó alojar el backend (Render,
+  Koyeb…) porque el usuario no quiere depender de un servidor.
+- La app se empaqueta con `jpackage` (Java incluido) para Windows, macOS
+  (Apple Silicon, runner `macos-latest`) y Linux x86-64. Perfil `local`: escucha
+  solo en 127.0.0.1, informes en memoria, IA con Ollama local y caída limpia a
+  `COMPLETED_WITHOUT_AI` si no está instalado.
+- El backend sirve el frontend compilado y las rutas del SPA solo en el perfil
+  `local`; las páginas reciben la misma CSP que pone nginx.
+- La web de Vercel se compila con `VITE_PUBLIC_SITE=true`: el analizador redirige
+  a `/descargar`, que enlaza a `releases/latest/download/…` de GitHub.

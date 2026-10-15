@@ -21,3 +21,6 @@ frontend/coverage/
 
 # Configuración local de Claude Code (rutas de esta máquina)
 .claude/
+
+# Frontend compilado que se empaqueta en la app de escritorio (lo genera el workflow de release)
+backend/src/main/resources/static/

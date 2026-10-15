@@ -16,7 +16,8 @@ public record BrowseMeProperties(
         @DefaultValue Executor executor,
         @DefaultValue Fetch fetch,
         @DefaultValue Ai ai,
-        @DefaultValue Web web) {
+        @DefaultValue Web web,
+        @DefaultValue Desktop desktop) {
 
     public enum Persistence { JPA, MEMORY }
 
@@ -47,5 +48,9 @@ public record BrowseMeProperties(
             @DefaultValue("5") int submitsPerMinute,
             @DefaultValue("120") int readsPerMinute,
             @DefaultValue("false") boolean hsts) {
+    }
+
+    /** App de escritorio (perfil {@code local}): abrir el navegador al arrancar. */
+    public record Desktop(@DefaultValue("false") boolean openBrowser) {
     }
 }

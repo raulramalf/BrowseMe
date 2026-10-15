@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router'
+import { isPublicSite } from '../site'
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -28,9 +29,15 @@ export function Layout({ children }: { children: ReactNode }) {
                 <NavLink to="/sobre">Sobre el proyecto</NavLink>
               </li>
               <li>
-                <NavLink to="/analizar" className="nav-cta">
-                  Analizar mi web
-                </NavLink>
+                {isPublicSite() ? (
+                  <NavLink to="/descargar" className="nav-cta">
+                    Descargar
+                  </NavLink>
+                ) : (
+                  <NavLink to="/analizar" className="nav-cta">
+                    Analizar mi web
+                  </NavLink>
+                )}
               </li>
             </ul>
           </nav>
