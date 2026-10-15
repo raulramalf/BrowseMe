@@ -4,6 +4,14 @@ Inspirado en una guía de estilo tipo «consola de ingeniería»: lienzo oscuro
 (obsidiana `#132322`), tarjetas claras (menta `#edf7f5`) y un único verde de
 acción (`#3ddc91`). Los tokens viven en `frontend/src/styles/index.css`.
 
+## Páginas
+- `/`: landing (hero con llamadas a la acción, vista de ejemplo de informe,
+  cifras del servicio, ventajas, cómo funciona, alcance, preguntas frecuentes
+  y banda final de llamada a la acción).
+- `/analizar`: formulario del analizador.
+- `frontend/vercel.json` reescribe todas las rutas a `index.html` para que
+  las rutas del SPA funcionen al recargar si se publica en Vercel.
+
 ## Reglas
 - El verde se reserva a acciones (botón, navegación activa), cifras destacadas
   y el estado en curso del progreso. No es decoración.

@@ -1,4 +1,5 @@
-import { UrlForm } from '../components/UrlForm'
+import { Link } from 'react-router'
+import { FAQ } from './faq'
 import { useDocumentTitle } from './useDocumentTitle'
 
 /** Cifras que describen el propio servicio (no métricas de terceros). */
@@ -8,6 +9,15 @@ const STATS: [string, string][] = [
   ['7 días', 'Y el informe se borra'],
   ['100 %', 'Código abierto'],
 ]
+
+const FEATURES: [string, string, string][] = [
+  ['Hechos', 'Hallazgos con evidencia', 'Cada problema sale de una regla fija y muestra exactamente qué se encontró en tu página.'],
+  ['IA local', 'Explicado sin tecnicismos', 'Un modelo de IA en nuestro propio servidor traduce los hallazgos a un plan de acción claro.'],
+  ['Privacidad', 'Sin registro ni rastreo', 'No hay cuentas, analítica ni publicidad. El informe se borra solo a los 7 días.'],
+  ['Honestidad', 'Sin notas inventadas', 'No damos una puntuación arbitraria del 0 al 100: cada hallazgo indica su importancia.'],
+]
+
+const FAQ_PREVIEW = FAQ.slice(0, 4)
 
 export function HomePage() {
   useDocumentTitle('Análisis SEO para pequeños negocios')
@@ -21,31 +31,45 @@ export function HomePage() {
             BrowseMe revisa la página que indiques, comprueba los puntos básicos de SEO y te lo explica en lenguaje
             sencillo. Es gratis, no necesitas registrarte y no usamos cookies de seguimiento.
           </p>
-          <UrlForm />
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="hero-art-module hero-art-white">
-            <span className="hero-art-index">01</span>
-            <span className="hero-art-title">
-              Descarga segura
-              <span className="hero-art-sub">Solo la página indicada</span>
-            </span>
-          </div>
-          <div className="hero-art-module hero-art-mint">
-            <span className="hero-art-index">02</span>
-            <span className="hero-art-title">
-              Reglas deterministas
-              <span className="hero-art-sub">Cada hallazgo, con su evidencia</span>
-            </span>
-          </div>
-          <div className="hero-art-module hero-art-yellow">
-            <span className="hero-art-index">03</span>
-            <span className="hero-art-title">
-              Explicación con IA local
-              <span className="hero-art-sub">Interpreta, no detecta</span>
-            </span>
+          <div className="cta-row">
+            <Link to="/analizar" className="button">
+              Analizar mi web gratis
+            </Link>
+            <a href="#como-funciona" className="button button-ghost">
+              Ver cómo funciona
+            </a>
           </div>
         </div>
+
+        <figure className="preview" aria-label="Vista de ejemplo de un informe">
+          <div className="preview-chrome" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span className="preview-address">browseme · informe</span>
+          </div>
+          <div className="preview-body" aria-hidden="true">
+            <span className="preview-eyebrow">Verificado por reglas</span>
+            <div className="preview-counts">
+              <span className="sev-high">Alta</span>
+              <span className="sev-medium">Media</span>
+              <span className="sev-low">Baja</span>
+            </div>
+            <div className="preview-issue sev-border-high">
+              <strong>La página no usa HTTPS</strong>
+              <span>Evidencia: la página se sirve por HTTP</span>
+            </div>
+            <div className="preview-issue sev-border-medium">
+              <strong>Falta la metadescripción</strong>
+              <span>Evidencia: no hay etiqueta description</span>
+            </div>
+            <div className="preview-ai">
+              <span className="badge badge-ai">IA · No verificada</span>
+              <span>Empieza por activar HTTPS con tu proveedor…</span>
+            </div>
+          </div>
+          <figcaption>Ejemplo ilustrativo de informe</figcaption>
+        </figure>
       </section>
 
       <ul className="stats" aria-label="BrowseMe en cifras">
@@ -57,7 +81,24 @@ export function HomePage() {
         ))}
       </ul>
 
-      <section className="card-light section" aria-labelledby="como-titulo">
+      <section className="section" aria-labelledby="ventajas-titulo">
+        <div className="section-head on-dark">
+          <span className="eyebrow">Por qué BrowseMe</span>
+          <h2 id="ventajas-titulo">Un informe en el que puedes confiar</h2>
+          <p>Separamos lo que está comprobado de lo que es interpretación, para que sepas siempre qué es un hecho.</p>
+        </div>
+        <ul className="feature-grid">
+          {FEATURES.map(([tag, title, text]) => (
+            <li key={title} className="feature-tile">
+              <span className="eyebrow">{tag}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section id="como-funciona" className="card-light section" aria-labelledby="como-titulo">
         <div className="section-head">
           <span className="eyebrow">Proceso</span>
           <h2 id="como-titulo">Cómo funciona</h2>
@@ -114,10 +155,34 @@ export function HomePage() {
         </div>
       </section>
 
-      <p className="notice">
-        El análisis es automático y orientativo. Seguir sus recomendaciones no garantiza ningún resultado en
-        buscadores.
-      </p>
+      <section className="card-light section" aria-labelledby="faq-titulo">
+        <div className="section-head">
+          <span className="eyebrow">Dudas</span>
+          <h2 id="faq-titulo">Preguntas frecuentes</h2>
+        </div>
+        {FAQ_PREVIEW.map(([question, answer]) => (
+          <details key={question} className="faq">
+            <summary>{question}</summary>
+            <p>{answer}</p>
+          </details>
+        ))}
+        <p className="faq-more">
+          <Link to="/sobre">Ver todas las preguntas</Link>
+        </p>
+      </section>
+
+      <section className="cta-band section" aria-labelledby="cta-titulo">
+        <span className="eyebrow">Gratis · Sin registro</span>
+        <h2 id="cta-titulo">Descubre qué ven los buscadores de tu web</h2>
+        <p>Escribe la dirección de tu página y recibe un informe claro en pocos minutos.</p>
+        <Link to="/analizar" className="button">
+          Empezar el análisis
+        </Link>
+        <p className="cta-note">
+          El análisis es automático y orientativo. Seguir sus recomendaciones no garantiza ningún resultado en
+          buscadores.
+        </p>
+      </section>
     </>
   )
 }

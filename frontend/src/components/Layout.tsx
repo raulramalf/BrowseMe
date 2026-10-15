@@ -21,11 +21,16 @@ export function Layout({ children }: { children: ReactNode }) {
             <ul className="nav-list">
               <li>
                 <NavLink to="/" end>
-                  Analizar
+                  Inicio
                 </NavLink>
               </li>
               <li>
                 <NavLink to="/sobre">Sobre el proyecto</NavLink>
+              </li>
+              <li>
+                <NavLink to="/analizar" className="nav-cta">
+                  Analizar mi web
+                </NavLink>
               </li>
             </ul>
           </nav>

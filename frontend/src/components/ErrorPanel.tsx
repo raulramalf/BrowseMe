@@ -8,7 +8,7 @@ export function ErrorPanel({ title, message, retry }: { title: string; message: 
       <p>{message}</p>
       {retry !== false && (
         <p>
-          <Link to="/">Volver a analizar una web</Link>
+          <Link to="/analizar">Volver a analizar una web</Link>
         </p>
       )}
     </section>
