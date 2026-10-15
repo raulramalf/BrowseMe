@@ -79,9 +79,10 @@ persona con el perfil `local`:
 Los ejecutables los genera [.github/workflows/release.yml](.github/workflows/release.yml)
 con `jpackage`:
 
-- **Publicar una versión**: `git tag v1.0.0 && git push origin v1.0.0`. Crea la
-  release de GitHub con `BrowseMe-windows.zip`, `BrowseMe-macos.zip` y
-  `BrowseMe-linux.zip`.
+- **Publicar una versión**: cambia el número del archivo [VERSION](VERSION)
+  (p. ej. a `1.1.0`) y súbelo a `main`. El workflow crea la etiqueta `v1.1.0` y
+  la release de GitHub con `BrowseMe-windows.zip`, `BrowseMe-macos.zip` y
+  `BrowseMe-linux.zip`. También funciona subiendo una etiqueta `vX.Y.Z`.
 - **Probar sin publicar**: ejecuta el workflow *Release* a mano en la pestaña
   *Actions*; los zips quedan como artefactos.
 

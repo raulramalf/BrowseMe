@@ -1,12 +1,16 @@
 # Empaqueta la app de escritorio (backend + frontend + Java incluido) para
 # Windows, macOS y Linux con jpackage.
-# - Al subir una etiqueta vX.Y.Z: crea la release de GitHub y adjunta los zips.
+# - Al cambiar el archivo VERSION en main (p. ej. a 1.1.0): crea la etiqueta
+#   v1.1.0 y la release de GitHub, y adjunta los zips.
+# - Al subir una etiqueta vX.Y.Z a mano: igual, con esa versión.
 # - A mano (workflow_dispatch): solo genera los zips como artefactos para probar.
 name: Release
 
 on:
   push:
     tags: ['v*']
+    branches: [main]
+    paths: ['VERSION']
   workflow_dispatch:
 
 permissions:
@@ -58,10 +62,12 @@ jobs:
         id: version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            echo "app=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+            VERSION="${GITHUB_REF_NAME#v}"
           else
-            echo "app=1.0.0" >> "$GITHUB_OUTPUT"
+            VERSION="$(tr -d '[:space:]' < VERSION)"
           fi
+          echo "app=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Crear el ejecutable con jpackage
         run: |
@@ -109,10 +115,16 @@ jobs:
           archive: false
 
       - name: Adjuntar a la release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --title "BrowseMe $GITHUB_REF_NAME" --generate-notes 2>/dev/null \
-            || gh release view "$GITHUB_REF_NAME" > /dev/null
-          gh release upload "$GITHUB_REF_NAME" "${{ steps.zip.outputs.file }}" --clobber
+          # Los tres trabajos llegan aquí en paralelo: el primero crea la release
+          # (y la etiqueta, sobre este commit); los demás la encuentran ya creada.
+          for attempt in 1 2 3 4 5; do
+            if gh release view "$TAG" > /dev/null 2>&1; then break; fi
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "BrowseMe $TAG" --generate-notes && break
+            sleep 5
+          done
+          gh release upload "$TAG" "${{ steps.zip.outputs.file }}" --clobber
