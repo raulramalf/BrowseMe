@@ -34,4 +34,8 @@ public record SeoIssue(RuleId ruleId, String evidence, String limitation, String
     public IssueSeverity severity() {
         return ruleId.severity();
     }
+
+    public RuleArea area() {
+        return ruleId.area();
+    }
 }

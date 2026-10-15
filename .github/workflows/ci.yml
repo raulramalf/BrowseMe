@@ -21,8 +21,11 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      # Los runners de GitHub tienen Docker: aquí sí se ejecutan los tests con Testcontainers.
+      # Los runners de GitHub tienen Docker: aquí sí se ejecutan los tests con Testcontainers
+      # y Google Chrome, con el que se prueba el análisis visual (sin sandbox: solo páginas de prueba propias).
       - name: Compilar y probar
+        env:
+          BROWSEME_NO_SANDBOX: 'true'
         run: ./mvnw -B verify
 
   frontend:

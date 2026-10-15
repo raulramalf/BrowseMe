@@ -7,12 +7,15 @@ import io.github.raulramalf.browseme.application.port.out.AiUnavailableException
 import io.github.raulramalf.browseme.application.port.out.AnalysisRepository;
 import io.github.raulramalf.browseme.application.port.out.FetchFailedException;
 import io.github.raulramalf.browseme.application.port.out.PageFetcher;
+import io.github.raulramalf.browseme.application.port.out.PageRenderer;
 import io.github.raulramalf.browseme.domain.analysis.AiInterpretation;
 import io.github.raulramalf.browseme.domain.analysis.AiStatus;
 import io.github.raulramalf.browseme.domain.analysis.AnalysisErrorCode;
 import io.github.raulramalf.browseme.domain.analysis.AnalysisStatus;
 import io.github.raulramalf.browseme.domain.analysis.WebsiteAnalysis;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
+import io.github.raulramalf.browseme.domain.page.VisualStatus;
 import io.github.raulramalf.browseme.domain.seo.RuleId;
 import io.github.raulramalf.browseme.domain.seo.SeoIssue;
 import io.github.raulramalf.browseme.domain.seo.SeoRuleEngine;
@@ -30,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Orquesta un análisis: descarga, reglas, IA y persistencia. Se guarda tras
+ * Orquesta un análisis: descarga, análisis visual, reglas, IA y persistencia. Se guarda tras
  * cada transición para que el cliente vea el progreso al sondear.
  *
  * <p>La IA es el último paso y es prescindible: cualquier fallo suyo deja el
@@ -42,6 +45,7 @@ public final class AnalysisProcessor {
 
     private final AnalysisRepository repository;
     private final PageFetcher fetcher;
+    private final PageRenderer renderer;
     private final SeoRuleEngine engine;
     private final AiInterpreter interpreter;
     private final UrlPolicy policy;
@@ -49,10 +53,11 @@ public final class AnalysisProcessor {
     private final AiInputFactory inputFactory = new AiInputFactory();
     private final AiOutputValidator validator = new AiOutputValidator();
 
-    public AnalysisProcessor(AnalysisRepository repository, PageFetcher fetcher, SeoRuleEngine engine,
-                             AiInterpreter interpreter, UrlPolicy policy, Clock clock) {
+    public AnalysisProcessor(AnalysisRepository repository, PageFetcher fetcher, PageRenderer renderer,
+                             SeoRuleEngine engine, AiInterpreter interpreter, UrlPolicy policy, Clock clock) {
         this.repository = repository;
         this.fetcher = fetcher;
+        this.renderer = renderer;
         this.engine = engine;
         this.interpreter = interpreter;
         this.policy = policy;
@@ -94,21 +99,24 @@ public final class AnalysisProcessor {
             return;
         }
 
-        List<SeoIssue> issues = engine.evaluate(snapshot);
         analysis.startAnalyzing(snapshot);
         if (snapshot.httpStatus() >= 400) {
-            analysis.fail(AnalysisErrorCode.HTTP_ERROR, issues, clock.instant());
+            analysis.fail(AnalysisErrorCode.HTTP_ERROR, engine.evaluate(snapshot), clock.instant());
             repository.save(analysis);
             return;
         }
         repository.save(analysis);
+
+        // El análisis visual es prescindible: si falla, el informe sigue con las reglas del HTML.
+        analysis.attachVisual(render(snapshot));
+        List<SeoIssue> issues = engine.evaluate(analysis.snapshot().orElseThrow());
 
         analysis.startInterpreting(issues);
         repository.save(analysis);
 
         Set<RuleId> detected = issues.stream().map(SeoIssue::ruleId).collect(Collectors.toSet());
         try {
-            AiDraft draft = interpreter.interpret(inputFactory.create(snapshot, issues));
+            AiDraft draft = interpreter.interpret(inputFactory.create(analysis.snapshot().orElseThrow(), issues));
             Optional<AiInterpretation> interpretation = validator.validate(draft, detected);
             if (interpretation.isPresent()) {
                 analysis.complete(interpretation.get(), clock.instant());
@@ -124,6 +132,16 @@ public final class AnalysisProcessor {
             analysis.completeWithoutAi(AiStatus.UNAVAILABLE, clock.instant());
         }
         repository.save(analysis);
+    }
+
+    private VisualCheck render(PageSnapshot snapshot) {
+        try {
+            VisualCheck check = renderer.render(snapshot.finalUrl());
+            return check == null ? VisualCheck.of(VisualStatus.FAILED) : check;
+        } catch (RuntimeException e) {
+            LOG.log(Level.WARNING, "El análisis visual falló: " + e.getClass().getName());
+            return VisualCheck.of(VisualStatus.FAILED);
+        }
     }
 
     private void fail(WebsiteAnalysis analysis, AnalysisErrorCode code) {

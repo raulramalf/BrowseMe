@@ -5,6 +5,7 @@ import io.github.raulramalf.browseme.application.port.in.SubmitAnalysisUseCase;
 import io.github.raulramalf.browseme.application.port.out.AiInterpreter;
 import io.github.raulramalf.browseme.application.port.out.AnalysisRepository;
 import io.github.raulramalf.browseme.application.port.out.PageFetcher;
+import io.github.raulramalf.browseme.application.port.out.PageRenderer;
 import io.github.raulramalf.browseme.application.service.AnalysisMaintenance;
 import io.github.raulramalf.browseme.application.service.AnalysisProcessor;
 import io.github.raulramalf.browseme.application.service.GetAnalysisService;
@@ -16,9 +17,11 @@ import io.github.raulramalf.browseme.infrastructure.ai.FakeAiInterpreter;
 import io.github.raulramalf.browseme.infrastructure.ai.SpringAiOllamaInterpreter;
 import io.github.raulramalf.browseme.infrastructure.fetch.FetchLimits;
 import io.github.raulramalf.browseme.infrastructure.fetch.SafeHttpPageFetcher;
+import io.github.raulramalf.browseme.infrastructure.fetch.SafeResourceFetcher;
 import io.github.raulramalf.browseme.infrastructure.persistence.AnalysisJpaDao;
 import io.github.raulramalf.browseme.infrastructure.persistence.InMemoryAnalysisRepository;
 import io.github.raulramalf.browseme.infrastructure.persistence.JpaAnalysisRepository;
+import io.github.raulramalf.browseme.infrastructure.render.ChromeRenderer;
 import java.time.Clock;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -64,6 +67,18 @@ public class UseCaseConfig {
     }
 
     @Bean
+    PageRenderer pageRenderer(UrlPolicy policy, BrowseMeProperties properties) {
+        BrowseMeProperties.Fetch fetch = properties.fetch();
+        BrowseMeProperties.Visual visual = properties.visual();
+        SafeResourceFetcher resources = new SafeResourceFetcher(policy, new FetchLimits(fetch.connectTimeout(),
+                fetch.readTimeout(), fetch.totalTimeout(), fetch.robotsTimeout(), fetch.maxBodyBytes(),
+                fetch.maxRedirects()), fetch.userAgent());
+        return new ChromeRenderer(new ChromeRenderer.Settings(visual.mode() == BrowseMeProperties.VisualMode.AUTO,
+                visual.browserPath(), visual.timeout(), visual.maxRequests(), visual.maxTotalBytes(),
+                visual.maxResourceBytes()), resources);
+    }
+
+    @Bean
     AiInterpreter aiInterpreter(BrowseMeProperties properties, ObjectProvider<ChatModel> chatModel) {
         BrowseMeProperties.Ai ai = properties.ai();
         return switch (ai.mode()) {
@@ -94,9 +109,10 @@ public class UseCaseConfig {
     }
 
     @Bean
-    AnalysisProcessor analysisProcessor(AnalysisRepository repository, PageFetcher fetcher, SeoRuleEngine engine,
-                                        AiInterpreter interpreter, UrlPolicy policy, Clock clock) {
-        return new AnalysisProcessor(repository, fetcher, engine, interpreter, policy, clock);
+    AnalysisProcessor analysisProcessor(AnalysisRepository repository, PageFetcher fetcher, PageRenderer renderer,
+                                        SeoRuleEngine engine, AiInterpreter interpreter, UrlPolicy policy,
+                                        Clock clock) {
+        return new AnalysisProcessor(repository, fetcher, renderer, engine, interpreter, policy, clock);
     }
 
     @Bean

@@ -12,6 +12,9 @@ export type AnalysisStatus =
 
 export type Severity = 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO'
 export type Category = 'TECHNICAL' | 'EDITORIAL'
+/** SEO, captación y fidelización de clientes, y patrones de diseño. */
+export type Area = 'SEO' | 'ENGAGEMENT' | 'DESIGN'
+export type VisualStatus = 'DONE' | 'DISABLED' | 'BROWSER_NOT_FOUND' | 'FAILED' | 'NOT_RUN'
 export type AiStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'INVALID_OUTPUT'
 
 export interface AnalysisCreated {
@@ -23,6 +26,7 @@ export interface Issue {
   ruleId: string
   category: Category
   severity: Severity
+  area: Area
   title: string
   evidence: string
   limitation: string
@@ -45,6 +49,70 @@ export interface PageSummary {
   viewportPresent: boolean
   visibleWordCount: number
   robotsTxt: 'ALLOWED' | 'BLOCKED' | 'NOT_FOUND' | 'UNAVAILABLE'
+  engagement: Engagement
+  design: Design
+  visual: Visual
+}
+
+export interface Engagement {
+  phoneLinks: number
+  emailLinks: number
+  whatsappLinks: number
+  forms: number
+  emailForms: number
+  callsToAction: number
+  socialNetworks: string[]
+  schemaTypes: string[]
+  testimonials: boolean
+  openGraphTitle: boolean
+  openGraphImage: boolean
+}
+
+export interface Design {
+  navigation: boolean
+  favicon: boolean
+  genericLinkTexts: number
+  emptyInteractive: number
+  formFields: number
+  unlabeledFormFields: number
+  imagesWithoutDimensions: number
+}
+
+export interface VisualMetrics {
+  viewportWidth: number
+  contentWidth: number
+  textElementsChecked: number
+  lowContrastTexts: number
+  smallTexts: number
+  tapTargetsChecked: number
+  smallTapTargets: number
+  fontFamilies: string[]
+  callToActionAboveFoldMobile: boolean
+  callToActionAboveFoldDesktop: boolean
+  pageHeightScreens: number
+}
+
+export interface Visual {
+  status: VisualStatus
+  metrics: VisualMetrics | null
+  mobileScreenshot: boolean
+  desktopScreenshot: boolean
+}
+
+export interface AreaScore {
+  area: Area
+  value: number
+  weightPercent: number
+  findings: number
+  partial: boolean
+}
+
+/** Nota de 0 a 10 calculada por el backend con una fórmula fija (nunca por la IA). */
+export interface Score {
+  value: number
+  partial: boolean
+  areas: AreaScore[]
+  penalties: Record<Severity, number>
 }
 
 export interface Recommendation {
@@ -74,6 +142,7 @@ export interface Analysis {
   pageSummary: PageSummary | null
   issues: Issue[]
   severityCounts: Record<Severity, number>
+  score: Score | null
   ai: AiResult | null
   limitations: string[]
   error: { code: string; message: string } | null

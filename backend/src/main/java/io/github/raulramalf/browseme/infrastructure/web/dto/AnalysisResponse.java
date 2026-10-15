@@ -17,6 +17,7 @@ public record AnalysisResponse(
         PageSummaryDto pageSummary,
         List<IssueDto> issues,
         Map<String, Integer> severityCounts,
+        ScoreDto score,
         AiDto ai,
         List<String> limitations,
         ErrorDto error) {
@@ -24,14 +25,48 @@ public record AnalysisResponse(
     public record PageSummaryDto(int httpStatus, int redirectCount, boolean https, String title,
                                  String metaDescription, String lang, String canonical, List<String> robotsDirectives,
                                  Map<String, Long> headingCounts, int internalLinks, int externalLinks,
-                                 ImagesDto images, boolean viewportPresent, int visibleWordCount, String robotsTxt) {
+                                 ImagesDto images, boolean viewportPresent, int visibleWordCount, String robotsTxt,
+                                 EngagementDto engagement, DesignDto design, VisualDto visual) {
+    }
+
+    public record EngagementDto(int phoneLinks, int emailLinks, int whatsappLinks, int forms, int emailForms,
+                                int callsToAction, List<String> socialNetworks, List<String> schemaTypes,
+                                boolean testimonials, boolean openGraphTitle, boolean openGraphImage) {
+    }
+
+    public record DesignDto(boolean navigation, boolean favicon, int genericLinkTexts, int emptyInteractive,
+                            int formFields, int unlabeledFormFields, int imagesWithoutDimensions) {
+    }
+
+    /**
+     * {@code status}: DONE, DISABLED, BROWSER_NOT_FOUND, FAILED o NOT_RUN. Las
+     * métricas solo existen con DONE; las capturas se piden aparte.
+     */
+    public record VisualDto(String status, VisualMetricsDto metrics, boolean mobileScreenshot,
+                            boolean desktopScreenshot) {
+    }
+
+    public record VisualMetricsDto(int viewportWidth, int contentWidth, int textElementsChecked,
+                                   int lowContrastTexts, int smallTexts, int tapTargetsChecked, int smallTapTargets,
+                                   List<String> fontFamilies, boolean callToActionAboveFoldMobile,
+                                   boolean callToActionAboveFoldDesktop, int pageHeightScreens) {
+    }
+
+    /**
+     * Nota de 0 a 10 con una decimal, su desglose y la fórmula con la que se
+     * calcula, para que el informe pueda explicarla.
+     */
+    public record ScoreDto(double value, boolean partial, List<AreaScoreDto> areas, Map<String, Double> penalties) {
+    }
+
+    public record AreaScoreDto(String area, double value, int weightPercent, int findings, boolean partial) {
     }
 
     public record ImagesDto(int total, int withAlt, int decorative, int missingAlt) {
     }
 
-    public record IssueDto(String ruleId, String category, String severity, String title, String evidence,
-                           String limitation, String recommendation) {
+    public record IssueDto(String ruleId, String category, String severity, String area, String title,
+                           String evidence, String limitation, String recommendation) {
     }
 
     /** {@code status} es AVAILABLE, UNAVAILABLE o INVALID_OUTPUT; el resto es null si no hay IA. */

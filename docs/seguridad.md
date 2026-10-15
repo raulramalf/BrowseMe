@@ -46,6 +46,22 @@ aplicación sea segura; este documento explica qué se hace y qué queda abierto
 - Actuator: solo `health`, sin detalles; nginx no lo publica.
 - Secretos solo por variables de entorno (`.env` ignorado por git, `.env.example` versionado). El backend corre como usuario no root en su contenedor y no publica puertos.
 
+## Análisis visual con un navegador real (v1.1)
+
+La app puede dibujar la página con el Chrome, Edge o Chromium **del equipo** (no se incluye ninguno) para medir contraste, tamaños y desbordes en móvil. Un navegador es una superficie de ataque nueva, así que se aísla de la red y la regla anti-SSRF no se relaja:
+
+| Medida | Dónde | Test |
+|---|---|---|
+| El navegador no resuelve ningún nombre (`--host-resolver-rules=MAP * ~NOTFOUND`) y todo su tráfico va a un proxy inexistente (`127.0.0.1:1`): no tiene salida propia, ni hacia IPs literales | `ChromeRenderer.launch` | `the_browser_never_reaches_the_network_on_its_own` |
+| Cada petición de la página se intercepta (`Fetch.requestPaused`) y la hace `SafeResourceFetcher`, con la misma política de URLs, DNS validado, comprobación de la IP conectada, sin proxy ni cookies | `RequestBroker`, `SafeResourceFetcher` | mismo test (IP literal, host privado y metadatos no llegan) |
+| Solo GET y tipos necesarios para dibujar; máximo de peticiones, bytes totales y por recurso; redirecciones devueltas al navegador, que vuelve a pedirlas por el mismo filtro | `RequestBroker` | `ChromeRendererTest` |
+| WebRTC sin UDP directo; diálogos de la página descartados; cookies del recurso no se reenvían | `ChromeRenderer` | revisión de código |
+| Las métricas se calculan en un **mundo aislado** de JavaScript que el código de la página no puede alterar, y se validan igualmente como dato no confiable (rangos, tamaños, listas acotadas) | `metrics.js`, `ChromeRenderer.metrics` | `ChromeRendererTest` |
+| Perfil temporal propio que se borra al terminar; el proceso y sus hijos se matan; plazo total configurable | `ChromeRenderer` | `leaves_no_temporary_profile_behind` |
+| Chrome puede arrancar con su sandbox activado. Solo se desactiva (`--no-sandbox`) si se ejecuta como root en Linux (contenedores) o si `BROWSEME_NO_SANDBOX=true`, que fija el CI para sus páginas de prueba propias | `ChromeRenderer.launch` | — |
+| Las capturas son JPEG de una página no confiable: se sirven como imagen (`image/jpeg`, `nosniff`, CSP de la API), con tope de 600 KB | `AnalysisController`, `VisualCheck` | `AnalysisApiTest` |
+| Si falla o no hay navegador, el análisis sigue con las reglas del HTML y lo dice en las limitaciones | `AnalysisProcessor` | `AnalysisProcessorTest` |
+
 ## Riesgos que no se eliminan del todo
 
 1. **Sin aislamiento de red a nivel de infraestructura.** La protección SSRF está en la aplicación. Como defensa en profundidad, en producción conviene que el contenedor del backend solo tenga salida a Internet (egress restringido: sin acceso a rangos privados, metadatos cloud ni otros servicios), por ejemplo con reglas de red del host o del proveedor.
@@ -53,4 +69,5 @@ aplicación sea segura; este documento explica qué se hace y qué queda abierto
 3. **Prompt injection mitigada, no eliminada.** Un texto bien diseñado podría sesgar la redacción de la IA. La validación impide que aparezcan hallazgos inventados, pero no garantiza que el tono o la priorización sean correctos.
 4. **Alucinaciones de modelos pequeños.** Se reducen con el esquema y la validación, pero no desaparecen. Por eso la interpretación se marca siempre como «no verificada».
 5. **El parser de URLs de Java y el de OkHttp no son idénticos.** Se mitiga revalidando con la URL ya normalizada y comprobando la IP conectada, pero cualquier diferencia futura entre parsers es un punto a vigilar.
-6. **Dependencias.** `npm audit` se ejecuta en CI. El análisis OWASP de dependencias Java (`dependency-check`) necesita descargar la base de datos NVD (y conviene una API key), así que no está automatizado; ver «Revisión de dependencias» en el README.
+6. **Navegador del equipo.** Chrome, Edge o Chromium pueden tener vulnerabilidades propias; el aislamiento de red y el sandbox reducen el riesgo, pero el navegador se actualiza con el sistema, no con BrowseMe. Quien no quiera usarlo puede desactivar el análisis visual (`BROWSEME_VISUAL_MODE=disabled`).
+7. **Dependencias.** `npm audit` se ejecuta en CI. El análisis OWASP de dependencias Java (`dependency-check`) necesita descargar la base de datos NVD (y conviene una API key), así que no está automatizado; ver «Revisión de dependencias» en el README.

@@ -117,6 +117,7 @@ describe('AnalysisPage', () => {
               ruleId: 'TITLE_LENGTH',
               category: 'EDITORIAL',
               severity: 'LOW',
+              area: 'SEO',
               title: 'Longitud del título mejorable',
               evidence: `El título tiene 90 caracteres: «${hostile}».`,
               limitation: '',
@@ -132,7 +133,79 @@ describe('AnalysisPage', () => {
     expect(await screen.findAllByText(hostile)).toHaveLength(2)
     expect(screen.getByText(/El título tiene 90 caracteres/).textContent).toContain('<script>')
     expect(container.querySelector('script')).toBeNull()
-    expect(container.querySelector('img')).toBeNull()
+    // Las únicas imágenes son las capturas propias, servidas por la API; nunca una inyectada por la página.
+    for (const image of container.querySelectorAll('img')) {
+      expect(image.getAttribute('src')).toMatch(/^\/api\/v1\/analyses\/[\w-]+\/screenshots\/(mobile|desktop)$/)
+      expect(image.hasAttribute('onerror')).toBe(false)
+    }
     expect((window as unknown as { hacked?: boolean }).hacked).toBeUndefined()
+  })
+
+  it('shows the 0-10 score with its breakdown and how it is calculated', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(completedAnalysis()))
+    renderPage()
+
+    const score = await screen.findByRole('region', { name: 'Nota de la página' })
+    expect(within(score).getByText('8,2')).toBeInTheDocument()
+    expect(within(score).getByText(/La IA no interviene en la nota/)).toBeInTheDocument()
+    const areas = within(score).getByRole('list', { name: 'Nota por área' })
+    expect(within(areas).getByText('Captación y fidelización')).toBeInTheDocument()
+    expect(within(areas).getByText('5,5')).toBeInTheDocument()
+    expect(within(score).getByText('Cómo se calcula')).toBeInTheDocument()
+    expect(within(score).getByText(/alta 3,0, media 1,5, baja 0,5, informativa 0,0/)).toBeInTheDocument()
+  })
+
+  it('warns that the design score is partial without the visual check', async () => {
+    const base = completedAnalysis()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      jsonResponse({
+        ...base,
+        score: { ...base.score!, partial: true },
+        pageSummary: { ...base.pageSummary!, visual: { status: 'BROWSER_NOT_FOUND', metrics: null, mobileScreenshot: false, desktopScreenshot: false } },
+      }),
+    )
+    renderPage()
+
+    expect(await screen.findByText(/solo cuenta el código, porque no hubo análisis visual/)).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /Así se ve tu página/ })).not.toBeInTheDocument()
+  })
+
+  it('shows the screenshots served by the API', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(completedAnalysis()))
+    renderPage()
+
+    const shots = await screen.findByRole('region', { name: /Así se ve tu página/ })
+    const mobile = within(shots).getByAltText(/en un móvil/)
+    expect(mobile).toHaveAttribute('src', '/api/v1/analyses/7c9e6679-7425-40de-944b-e07fc1f90ae7/screenshots/mobile')
+    expect(within(shots).getByAltText(/en un ordenador/)).toBeInTheDocument()
+  })
+
+  it('filters findings by area', async () => {
+    const base = completedAnalysis()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      jsonResponse({
+        ...base,
+        issues: [
+          ...base.issues,
+          {
+            ruleId: 'CONTACT_MISSING',
+            category: 'EDITORIAL',
+            severity: 'MEDIUM',
+            area: 'ENGAGEMENT',
+            title: 'No hay una forma directa de contacto',
+            evidence: 'Sin teléfono ni email.',
+            limitation: '',
+            recommendation: 'Añade un teléfono.',
+          },
+        ],
+      }),
+    )
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Captación y fidelización \(1\)/ }))
+
+    expect(screen.getByText('No hay una forma directa de contacto')).toBeInTheDocument()
+    expect(screen.queryByText('La página no usa HTTPS')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Captación y fidelización/ })).toHaveAttribute('aria-pressed', 'true')
   })
 })

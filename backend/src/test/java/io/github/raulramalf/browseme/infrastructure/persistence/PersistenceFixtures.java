@@ -5,6 +5,7 @@ import io.github.raulramalf.browseme.domain.analysis.Priority;
 import io.github.raulramalf.browseme.domain.analysis.Recommendation;
 import io.github.raulramalf.browseme.domain.analysis.WebsiteAnalysis;
 import io.github.raulramalf.browseme.domain.page.Heading;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
 import io.github.raulramalf.browseme.domain.seo.RuleId;
 import io.github.raulramalf.browseme.domain.seo.SeoIssue;
 import io.github.raulramalf.browseme.domain.seo.SnapshotFixture;
@@ -37,6 +38,8 @@ final class PersistenceFixtures {
                 .robots("noindex", "follow")
                 .headings(new Heading(1, "Hola"), new Heading(3, "Salto"))
                 .images(3, 1, 1, 1)
+                .visual(VisualCheck.done(SnapshotFixture.goodVisual(), new byte[] {(byte) 0xFF, (byte) 0xD8, 1},
+                        new byte[] {(byte) 0xFF, (byte) 0xD8, 2}))
                 .build());
         analysis.startInterpreting(List.of(
                 new SeoIssue(RuleId.NOINDEX_DETECTED, "Incluye «noindex»", "Puede ser intencionado", "Quítalo"),

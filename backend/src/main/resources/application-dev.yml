@@ -13,5 +13,8 @@ browseme:
   persistence: memory
   ai:
     mode: ${BROWSEME_AI_MODE:fake}
+  # Sin navegador por defecto en desarrollo y tests (BROWSEME_VISUAL_MODE=auto para probarlo).
+  visual:
+    mode: ${BROWSEME_VISUAL_MODE:disabled}
   web:
     allowed-origins: http://localhost:5173

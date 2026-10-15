@@ -1,10 +1,13 @@
 package io.github.raulramalf.browseme.infrastructure.fetch;
 
+import io.github.raulramalf.browseme.domain.page.DesignSignals;
+import io.github.raulramalf.browseme.domain.page.EngagementSignals;
 import io.github.raulramalf.browseme.domain.page.Heading;
 import io.github.raulramalf.browseme.domain.page.ImageStats;
 import io.github.raulramalf.browseme.domain.page.LinkStats;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
 import io.github.raulramalf.browseme.domain.page.RobotsTxtStatus;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -27,6 +30,8 @@ final class JsoupSnapshotExtractor {
 
     private static final Set<String> NON_NAVIGABLE_SCHEMES = Set.of("javascript", "mailto", "tel", "data");
     private static final String GOOGLEBOT_PREFIX = "googlebot:";
+
+    private final SignalsExtractor signals = new SignalsExtractor();
 
     /** Datos de la respuesta HTTP que el extractor necesita además del HTML. */
     record ResponseInfo(URI requestedUrl, URI finalUrl, int httpStatus, int redirectCount,
@@ -65,14 +70,18 @@ final class JsoupSnapshotExtractor {
                 images(document),
                 document.selectFirst("meta[name=viewport]") != null,
                 visibleWordCount(document),
-                info.robotsTxt());
+                info.robotsTxt(),
+                signals.engagement(document),
+                signals.design(document),
+                // El análisis visual se hace después, con un navegador real.
+                VisualCheck.notRun());
     }
 
     /** Snapshot mínimo para respuestas 4xx/5xx: no se analiza el cuerpo de una página de error. */
     PageSnapshot errorSnapshot(ResponseInfo info) {
         return new PageSnapshot(info.requestedUrl(), info.finalUrl(), info.httpStatus(), info.redirectCount(),
                 null, null, null, null, Set.of(), List.of(), new LinkStats(0, 0), ImageStats.none(), false, 0,
-                info.robotsTxt());
+                info.robotsTxt(), EngagementSignals.none(), DesignSignals.none(), VisualCheck.notRun());
     }
 
     private static String title(Document document) {

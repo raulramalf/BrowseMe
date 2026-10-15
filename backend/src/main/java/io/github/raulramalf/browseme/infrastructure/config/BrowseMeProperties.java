@@ -17,11 +17,15 @@ public record BrowseMeProperties(
         @DefaultValue Fetch fetch,
         @DefaultValue Ai ai,
         @DefaultValue Web web,
-        @DefaultValue Desktop desktop) {
+        @DefaultValue Desktop desktop,
+        @DefaultValue Visual visual) {
 
     public enum Persistence { JPA, MEMORY }
 
     public enum AiMode { OLLAMA, FAKE, DISABLED }
+
+    /** AUTO: usa Chrome, Edge o Chromium si están instalados; DISABLED: no hay análisis visual. */
+    public enum VisualMode { AUTO, DISABLED }
 
     /** Pool acotado: pocos hilos porque la IA en CPU es el cuello de botella. */
     public record Executor(@DefaultValue("2") int threads, @DefaultValue("20") int queueCapacity) {
@@ -52,5 +56,21 @@ public record BrowseMeProperties(
 
     /** App de escritorio (perfil {@code local}): abrir el navegador al arrancar. */
     public record Desktop(@DefaultValue("false") boolean openBrowser) {
+    }
+
+    /**
+     * Análisis visual con un navegador real (Chrome, Edge o Chromium del equipo).
+     *
+     * @param browserPath ruta al ejecutable; vacía = buscarlo en las rutas habituales
+     * @param timeout     plazo total, con el móvil y el escritorio
+     * @param maxRequests peticiones máximas que puede hacer la página dibujada
+     */
+    public record Visual(
+            @DefaultValue("auto") VisualMode mode,
+            @DefaultValue("") String browserPath,
+            @DefaultValue("45s") Duration timeout,
+            @DefaultValue("150") int maxRequests,
+            @DefaultValue("26214400") int maxTotalBytes,
+            @DefaultValue("5242880") int maxResourceBytes) {
     }
 }

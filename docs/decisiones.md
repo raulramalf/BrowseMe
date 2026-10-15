@@ -62,3 +62,27 @@ sin tocar lo innegociable (SSRF, validación de salida de IA, tests del núcleo)
   `local`; las páginas reciben la misma CSP que pone nginx.
 - La web de Vercel se compila con `VITE_PUBLIC_SITE=true`: el analizador redirige
   a `/descargar`, que enlaza a `releases/latest/download/…` de GitHub.
+
+## Versión 1.1: nota 0-10, captación y diseño (2026-10-15)
+
+Pedido por el propietario; respuestas a las preguntas de diseño:
+
+- **Nota 0-10: fórmula pública** (no la IA). Cambia el principio 4 del prompt de
+  desarrollo («no hay puntuación global arbitraria»): la nota no es arbitraria
+  porque es determinista, está desglosada y se explica en el informe. Pesos: SEO
+  40 %, captación y fidelización 30 %, diseño 30 %. Penalizaciones por severidad
+  en décimas con enteros (alta 30, media 15, baja 5, informativa 0).
+- **Retención: señales en la página.** La app no ve datos reales de clientes;
+  siete reglas detectan contacto, llamadas a la acción, suscripción, opiniones,
+  redes, datos del negocio y vista previa al compartir, y la IA explica cómo mejorar.
+- **Diseño: con navegador real.** Elegido frente a «solo estructura del HTML». Se usa
+  el Chrome, Edge o Chromium **ya instalado** (controlado por el DevTools Protocol
+  con `java.net.http.WebSocket`, sin dependencias nuevas), así que la descarga no crece
+  ~180 MB. Si no hay navegador, el análisis sigue con las reglas del HTML y la nota de
+  diseño se marca parcial. El aislamiento de red y la regla SSRF están descritos en
+  docs/seguridad.md.
+- Las capturas (JPEG, tope 600 KB) se guardan con el análisis; PostgreSQL las guarda
+  en el JSON del snapshot (Base64). Si fuese un problema, se moverían a una tabla
+  aparte.
+- Los análisis guardados antes de la 1.1 se siguen leyendo: los campos nuevos
+  toman valores por defecto.

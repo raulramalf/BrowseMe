@@ -54,10 +54,10 @@ const FEATURES: [IconName, string, string, string][] = [
   ['evidence', 'Hechos', 'Hallazgos con evidencia', 'Cada problema sale de una regla fija y muestra exactamente qué se encontró en tu página.'],
   ['ai', 'IA local', 'Explicado sin tecnicismos', 'Un modelo de IA que se ejecuta en tu ordenador traduce los hallazgos a un plan de acción claro.'],
   ['lock', 'Privacidad', 'Sin registro ni rastreo', 'No hay cuentas, analítica ni publicidad. Tus análisis no salen de tu ordenador.'],
-  ['scale', 'Honestidad', 'Sin notas inventadas', 'No damos una puntuación arbitraria del 0 al 100: cada hallazgo indica su importancia.'],
+  ['scale', 'Transparencia', 'Una nota que se explica', 'Valoración de 0 a 10 con fórmula pública y desglose por área. La misma página, siempre la misma nota.'],
 ]
 
-const FAQ_PREVIEW = FAQ.slice(0, 4)
+const FAQ_PREVIEW = FAQ.slice(0, 5)
 
 export function HomePage() {
   useDocumentTitle('Análisis SEO para pequeños negocios')
@@ -69,10 +69,11 @@ export function HomePage() {
     <>
       <section className="hero" aria-labelledby="inicio-titulo">
         <div>
-          <span className="eyebrow">Análisis SEO · Reglas verificables · IA local</span>
+          <span className="eyebrow">Nota 0-10 · Captación de clientes · Diseño · IA local</span>
           <h1 id="inicio-titulo">¿Cómo ven los buscadores la web de tu negocio?</h1>
           <p className="lead">
-            BrowseMe revisa la página que indiques, comprueba los puntos básicos de SEO y te lo explica en lenguaje
+            BrowseMe revisa la página que indiques, le pone una nota de 0 a 10 y te dice cómo captar y fidelizar más
+            clientes y qué patrones de diseño mejorar. Todo explicado en lenguaje
             sencillo. Es gratis, no necesitas registrarte y no usamos cookies de seguimiento.
           </p>
           <div className="cta-row">
@@ -181,23 +182,23 @@ export function HomePage() {
           <span className="eyebrow">Incluido</span>
           <h2>Qué analiza</h2>
           <ul className="check-list">
-            <li>Título, metadescripción e idioma</li>
-            <li>Encabezados (H1, H2…) y su estructura</li>
-            <li>HTTPS, redirecciones y errores de respuesta</li>
-            <li>Indexación: noindex, canonical y robots.txt</li>
-            <li>Imágenes sin texto alternativo y cantidad de texto</li>
-            <li>Configuración básica para móviles</li>
+            <li>SEO: título, descripción, encabezados, HTTPS e indexación</li>
+            <li>Captación: contacto, llamadas a la acción, suscripción y opiniones</li>
+            <li>Fidelización: redes sociales, datos del negocio y vista previa al compartir</li>
+            <li>Diseño del código: menú, formularios con etiquetas y enlaces claros</li>
+            <li>Diseño dibujado: desbordes en móvil, contraste, botones y tipografías</li>
+            <li>Una nota de 0 a 10 con desglose y fórmula pública</li>
           </ul>
         </div>
         <div className="card-dark">
           <span className="eyebrow">Fuera de alcance</span>
           <h2>Qué no puede analizar</h2>
           <ul className="check-list is-limit">
+            <li>Visitas, ventas ni clientes que repiten de tu negocio</li>
             <li>La velocidad real de carga</li>
-            <li>Cómo se usa realmente en un móvil</li>
             <li>La calidad de tus textos o tu posición en Google</li>
-            <li>Contenido generado con JavaScript</li>
             <li>El resto de páginas de tu sitio</li>
+            <li>Dibujar la página si no hay Chrome, Edge o Chromium instalado</li>
           </ul>
         </div>
       </section>

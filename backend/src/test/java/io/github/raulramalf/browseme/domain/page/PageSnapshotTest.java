@@ -14,7 +14,7 @@ class PageSnapshotTest {
     private static PageSnapshot snapshot(String finalUrl, String title, Set<String> robots, List<Heading> headings) {
         return new PageSnapshot(URI.create("http://example.com/"), URI.create(finalUrl), 200, 1,
                 title, "Descripción", "es", null, robots, headings,
-                new LinkStats(3, 1), ImageStats.none(), true, 120, RobotsTxtStatus.ALLOWED);
+                new LinkStats(3, 1), ImageStats.none(), true, 120, RobotsTxtStatus.ALLOWED, null, null, null);
     }
 
     @Test
@@ -86,7 +86,7 @@ class PageSnapshotTest {
     void rejects_impossible_values() {
         assertThatThrownBy(() -> new PageSnapshot(URI.create("http://e.com/"), URI.create("http://e.com/"), 42, 0,
                 null, null, null, null, null, null, new LinkStats(0, 0), ImageStats.none(), false, 0,
-                RobotsTxtStatus.NOT_FOUND)).isInstanceOf(IllegalArgumentException.class);
+                RobotsTxtStatus.NOT_FOUND, null, null, null)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new Heading(7, "x")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new ImageStats(3, 1, 1, 0)).isInstanceOf(IllegalArgumentException.class);
     }
@@ -97,5 +97,13 @@ class PageSnapshotTest {
 
         assertThat(images.decorative()).isEqualTo(2);
         assertThat(images.missingAlt()).isEqualTo(1);
+    }
+
+    @Test
+    void missing_signals_default_to_empty_for_older_saved_analyses() {
+        PageSnapshot snapshot = snapshot("https://example.com/", "t", Set.of(), List.of());
+        assertThat(snapshot.engagement()).isEqualTo(EngagementSignals.none());
+        assertThat(snapshot.design()).isEqualTo(DesignSignals.none());
+        assertThat(snapshot.visual().status()).isEqualTo(VisualStatus.NOT_RUN);
     }
 }

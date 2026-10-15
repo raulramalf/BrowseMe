@@ -7,8 +7,9 @@ export function AboutPage() {
     <article className="prose">
       <h1>Sobre BrowseMe</h1>
       <p>
-        BrowseMe ayuda a pequeñas empresas, autónomos y profesionales a entender cómo ven los buscadores su página web,
-        sin tecnicismos.
+        BrowseMe ayuda a pequeñas empresas, autónomos y profesionales a entender cómo ven los buscadores y los clientes
+        su página web, sin tecnicismos: una valoración de 0 a 10, qué mejorar para captar y fidelizar clientes y qué
+        patrones de diseño corregir.
       </p>
       <h2>Cómo funciona</h2>
       <p>
@@ -18,8 +19,9 @@ export function AboutPage() {
       </p>
       <h2>Limitaciones</h2>
       <p>
-        Solo se analiza una página y sin ejecutar JavaScript. No se mide la velocidad real, la experiencia en móviles,
-        la calidad del contenido ni el posicionamiento.
+        Solo se analiza una página, una vez. No se mide la velocidad real, la calidad del contenido ni el
+        posicionamiento, y no se ven visitas, ventas ni clientes que repiten: la captación y la fidelización se
+        valoran por las señales que hay en la página. La nota es orientativa.
       </p>
       <h2>Preguntas frecuentes</h2>
       {FAQ.map(([question, answer]) => (

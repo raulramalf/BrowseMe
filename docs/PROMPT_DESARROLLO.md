@@ -60,7 +60,7 @@ Trabaja de forma estructurada, justifica las decisiones técnicas y prioriza un 
 1. **Los hechos los produce el código, no la IA.** Cada problema nace de una regla con identificador, evidencia y limitación. La IA no detecta nada.
 2. **La seguridad es parte del núcleo.** El servidor descarga URLs de terceros; el riesgo principal es SSRF.
 3. **Honestidad epistémica.** El informe separa lo verificado por reglas de la interpretación de IA, y muestra siempre lo que no se pudo analizar. Si falta información, se dice.
-4. No hay puntuación global arbitraria; se muestran recuentos por severidad.
+4. ~~No hay puntuación global arbitraria~~ **(modificado en la v1.1, a petición del propietario, 2026-10-15)**: hay una valoración de 0 a 10, pero la calcula el código con una fórmula fija y pública (`ScoreCalculator`), nunca la IA; se muestra con su desglose por área, su método de cálculo y los recuentos por severidad. La nota es orientativa.
 
 ## 2. Alcance del MVP
 
@@ -152,6 +152,32 @@ Cada regla declara: identificador, descripción, condición, evidencia, severida
 | `THIN_CONTENT` (E) | Muy pocas palabras visibles | Info | Una web de una página puede ser correcta |
 | `REDIRECT_CHAIN` | Más de 2 redirecciones | Baja | |
 | `FETCH_HTTP_ERROR` | Respuesta 4xx/5xx | Alta | El análisis se detiene y se informa |
+
+### Reglas añadidas en la v1.1
+
+Pertenecen a un área (`RuleArea`): **ENGAGEMENT** (captación y fidelización) y **DESIGN** (patrones de diseño). Las del grupo «visual» solo se evalúan si hubo análisis visual con un navegador real. Todas son funciones puras del `PageSnapshot`.
+
+| ID | Área | Detección | Sev. | Limitación |
+|---|---|---|---|---|
+| `CONTACT_MISSING` (E) | Captación | Sin `tel:`, `mailto:`, WhatsApp ni formularios | Media | Puede estar en otra página |
+| `CTA_MISSING` (E) | Captación | Ningún enlace o botón con verbo de acción | Media | Vocabulario fijo es/en |
+| `SUBSCRIBE_MISSING` (E) | Captación | Ningún formulario con campo de email | Baja | No todo negocio necesita boletín |
+| `SOCIAL_PROOF_MISSING` (E) | Captación | Sin `Review`/`AggregateRating` ni encabezado de opiniones | Baja | Widgets con JS no se ven |
+| `SOCIAL_LINKS_MISSING` (E) | Captación | Sin enlaces a redes conocidas | Info | Puede no usarlas |
+| `BUSINESS_DATA_MISSING` | Captación | Sin schema.org Organization/LocalBusiness | Baja | Subtipos poco comunes |
+| `SHARE_PREVIEW_MISSING` | Captación | Falta `og:title` u `og:image` | Baja | — |
+| `NAV_MISSING` (E) | Diseño | Sin `<nav>` ni `role=navigation` | Baja | Menú sin marcar |
+| `GENERIC_LINK_TEXT` (E) | Diseño | Enlaces «clic aquí», «leer más»… | Baja | — |
+| `EMPTY_INTERACTIVE` | Diseño | Enlaces/botones sin texto ni nombre accesible | Media | Texto añadido con CSS/JS |
+| `FORM_LABELS_MISSING` | Diseño | Campos sin etiqueta (un `placeholder` no cuenta) | Media | — |
+| `IMAGES_NO_DIMENSIONS` | Diseño | Imágenes sin `width`/`height` | Baja | `aspect-ratio` en CSS |
+| `FAVICON_MISSING` | Diseño | Sin `<link rel=icon>` | Baja | `/favicon.ico` implícito |
+| `MOBILE_HORIZONTAL_SCROLL` | Diseño (visual) | Contenido más ancho que el móvil (>8 px) | Alta | Móvil simulado |
+| `LOW_CONTRAST_TEXT` | Diseño (visual) | ≥3 textos bajo WCAG AA (4,5:1; 3:1 grandes) | Media | Texto sobre imagen/degradado no se mide |
+| `SMALL_TAP_TARGETS` | Diseño (visual) | ≥3 elementos pulsables <24×24 px (WCAG 2.5.8) | Media | Enlaces en párrafos exentos |
+| `SMALL_TEXT_MOBILE` | Diseño (visual) | ≥3 textos <12 px en móvil | Baja | Notas legales intencionadas |
+| `CTA_NOT_VISIBLE_MOBILE` (E) | Diseño (visual) | Hay CTA pero ninguna en la primera pantalla del móvil | Baja | Móvil medio simulado |
+| `TOO_MANY_FONTS` (E) | Diseño (visual) | Más de 3 familias tipográficas | Info | Cuentan las de iconos |
 
 El informe debe declarar lo que **no se puede afirmar**: velocidad real, usabilidad móvil real, calidad del contenido, posicionamiento, contenido renderizado por JavaScript y estado de otras páginas.
 

@@ -4,9 +4,12 @@ import static io.github.raulramalf.browseme.domain.seo.SnapshotFixture.perfect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.raulramalf.browseme.domain.page.DesignSignals;
+import io.github.raulramalf.browseme.domain.page.EngagementSignals;
 import io.github.raulramalf.browseme.domain.page.Heading;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
 import io.github.raulramalf.browseme.domain.page.RobotsTxtStatus;
+import io.github.raulramalf.browseme.domain.page.VisualMetrics;
 import io.github.raulramalf.browseme.domain.seo.rules.NotHttpsRule;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +39,15 @@ class SeoRuleEngineTest {
         Set<RuleId> triggered = engine.evaluate(worst).stream().map(SeoIssue::ruleId).collect(Collectors.toSet());
         engine.evaluate(worseHeadings).forEach(issue -> triggered.add(issue.ruleId()));
         triggered.addAll(engine.evaluate(perfect().httpStatus(404).build()).stream().map(SeoIssue::ruleId).toList());
+        PageSnapshot noEngagementBadDesign = perfect().images(3, 3, 0, 0)
+                .engagement(new EngagementSignals(0, 0, 0, 0, 0, 1, Set.of(), Set.of(), false, false, false))
+                .design(new DesignSignals(false, false, 1, 1, 2, 2, 3))
+                .visual(new VisualMetrics(390, 700, 30, 4, List.of(), 5, 10, 6, List.of("A", "B", "C", "D"),
+                        false, false, 5))
+                .build();
+        triggered.addAll(engine.evaluate(noEngagementBadDesign).stream().map(SeoIssue::ruleId).toList());
+        triggered.addAll(engine.evaluate(perfect().engagement(EngagementSignals.none()).build()).stream()
+                .map(SeoIssue::ruleId).toList());
 
         assertThat(triggered).containsExactlyInAnyOrder(RuleId.values());
     }
@@ -79,7 +91,11 @@ class SeoRuleEngineTest {
                 .filter(id -> id.category() == IssueCategory.EDITORIAL).collect(Collectors.toSet());
 
         assertThat(editorial).containsExactlyInAnyOrder(RuleId.TITLE_LENGTH, RuleId.META_DESC_LENGTH,
-                RuleId.H1_MULTIPLE, RuleId.HEADING_SKIP, RuleId.THIN_CONTENT);
+                RuleId.H1_MULTIPLE, RuleId.HEADING_SKIP, RuleId.THIN_CONTENT,
+                // Captación y diseño que dependen del tipo de negocio
+                RuleId.CONTACT_MISSING, RuleId.CTA_MISSING, RuleId.SUBSCRIBE_MISSING, RuleId.SOCIAL_PROOF_MISSING,
+                RuleId.SOCIAL_LINKS_MISSING, RuleId.NAV_MISSING, RuleId.GENERIC_LINK_TEXT,
+                RuleId.CTA_NOT_VISIBLE_MOBILE, RuleId.TOO_MANY_FONTS);
     }
 
     @Test

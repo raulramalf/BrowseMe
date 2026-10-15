@@ -10,8 +10,10 @@ import java.util.stream.Collectors;
 final class PromptFactory {
 
     static final String SYSTEM = """
-            Eres un asistente que explica informes SEO a dueños de pequeños negocios sin conocimientos técnicos.
-            Escribe siempre en español, con frases claras y sin jerga.
+            Eres un asistente que explica informes web a dueños de pequeños negocios sin conocimientos técnicos.
+            El informe tiene tres áreas: SEO (que los buscadores encuentren la página), ENGAGEMENT (captar clientes y
+            conseguir que vuelvan: contacto, llamadas a la acción, suscripción, opiniones, redes) y DESIGN (patrones
+            de diseño y usabilidad). Escribe siempre en español, con frases claras y sin jerga.
 
             Reglas obligatorias:
             1. Solo interpretas, explicas y priorizas los HALLAZGOS que te da el sistema. No detectas nada nuevo.
@@ -23,7 +25,11 @@ final class PromptFactory {
                Si una recomendación no se apoya en ningún hallazgo, usa "ruleIds": [] y "generalSuggestion": true.
             5. "priority" solo puede ser "HIGH", "MEDIUM" o "LOW".
             6. Como máximo 5 elementos en cada lista y 8 recomendaciones. Resumen de 600 caracteres como máximo.
-            7. Responde únicamente con el JSON pedido, sin texto antes ni después.
+            7. La nota de 0 a 10 la calcula el sistema con una fórmula fija. Puedes mencionarla tal cual, pero nunca
+               la cambies, la recalcules ni des otra nota.
+            8. Incluye en "opportunities" y en las recomendaciones cómo captar y fidelizar clientes cuando haya
+               hallazgos de ENGAGEMENT, y qué patrones de diseño mejorar cuando haya hallazgos de DESIGN.
+            9. Responde únicamente con el JSON pedido, sin texto antes ni después.
             """;
 
     private PromptFactory() {
@@ -33,7 +39,7 @@ final class PromptFactory {
         String issues = input.issues().isEmpty()
                 ? "(ninguno: la página supera todas las comprobaciones)"
                 : input.issues().stream()
-                        .map(i -> "- " + i.ruleId() + " [" + i.severity() + ", " + i.category() + "]: "
+                        .map(i -> "- " + i.ruleId() + " [" + i.area() + ", " + i.severity() + ", " + i.category() + "]: "
                                 + neutralize(i.evidence()))
                         .collect(Collectors.joining("\n"));
         String ruleIds = input.issues().isEmpty() ? "(ninguno)" : String.join(", ", input.ruleIds());
@@ -48,7 +54,8 @@ final class PromptFactory {
                 RULE_IDS_DETECTADOS: %s
 
                 Explica al dueño del negocio qué significa este informe: resumen, puntos fuertes, oportunidades,
-                recomendaciones priorizadas y un plan de acción breve.
+                recomendaciones priorizadas (SEO, captación y fidelización de clientes, y diseño) y un plan de
+                acción breve.
                 """.formatted(neutralize(input.pageSummary()), issues, ruleIds);
     }
 

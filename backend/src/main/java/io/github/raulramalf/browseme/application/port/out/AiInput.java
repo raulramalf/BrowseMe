@@ -11,7 +11,8 @@ import java.util.List;
  */
 public record AiInput(String pageSummary, List<IssueSummary> issues) {
 
-    public record IssueSummary(String ruleId, String category, String severity, String evidence) {
+    /** {@code area}: SEO, ENGAGEMENT (captación y fidelización) o DESIGN (patrones de diseño). */
+    public record IssueSummary(String ruleId, String category, String severity, String area, String evidence) {
     }
 
     public AiInput {

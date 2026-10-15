@@ -16,16 +16,23 @@ las reglas. El informe separa siempre lo **verificado por reglas** de la
 
 | Analiza | No analiza |
 |---|---|
-| Título, metadescripción, idioma | Velocidad real de carga |
-| Encabezados H1-H6 y saltos de nivel | Usabilidad real en móviles |
-| HTTPS, redirecciones, errores HTTP | Calidad del contenido |
-| `noindex`, canonical, robots.txt | Posicionamiento en Google |
-| Imágenes sin `alt` (distingue `alt=""` decorativo) | Contenido generado con JavaScript |
-| Viewport, cantidad de texto visible | Otras páginas del sitio |
+| **SEO**: título, metadescripción, idioma, encabezados, HTTPS, redirecciones, `noindex`, canonical, robots.txt, imágenes sin `alt`, viewport, texto visible | Velocidad real de carga |
+| **Captación y fidelización**: contacto (teléfono, email, WhatsApp, formularios), llamadas a la acción, suscripción por email, opiniones, redes sociales, datos del negocio (schema.org), vista previa al compartir | Visitas, ventas ni clientes que repiten (solo señales en la página) |
+| **Diseño**: menú, enlaces con texto genérico, botones sin nombre, formularios sin etiqueta, imágenes sin tamaño, favicon; y, con Chrome/Edge/Chromium instalado, la página dibujada: desbordes en móvil, contraste, tamaño de botones y texto, tipografías | Calidad del contenido ni posicionamiento en Google |
+| **Nota de 0 a 10** con fórmula pública y desglose por área | Otras páginas del sitio |
 
-No hay puntuación global: se muestran recuentos por severidad y cada hallazgo
-con su evidencia y su limitación. Catálogo completo de las 18 reglas en
-[docs/PROMPT_DESARROLLO.md](docs/PROMPT_DESARROLLO.md#5-catálogo-de-reglas-seo).
+**Nota 0-10.** La calcula el código (`ScoreCalculator`), nunca la IA, así que la
+misma página siempre recibe la misma nota. Cada área (SEO 40 %, captación y
+fidelización 30 %, diseño 30 %) empieza en 10 y cada hallazgo resta según su
+severidad (alta 3, media 1,5, baja 0,5, informativa 0); la nota final es la
+media ponderada. El informe muestra el desglose y el método. Si no hubo
+análisis visual, la parte de diseño solo cuenta el HTML y se marca como parcial.
+
+Cada hallazgo lleva su evidencia y su limitación. La IA (Ollama local) explica y
+prioriza lo detectado, incluida la mejora de captación y de diseño, pero no
+detecta nada ni cambia la nota. Catálogo de reglas en
+[docs/PROMPT_DESARROLLO.md](docs/PROMPT_DESARROLLO.md#5-catálogo-de-reglas-seo)
+(37 reglas: 18 de SEO, 7 de captación, 6 de diseño del HTML y 6 de diseño visual).
 
 ## Arquitectura
 
@@ -148,6 +155,9 @@ cd frontend && npm test && npm run build
 | `BROWSEME_EXECUTOR_THREADS` / `_QUEUE_CAPACITY` | `2` / `20` | Análisis simultáneos y cola |
 | `BROWSEME_WEB_SUBMITS_PER_MINUTE` | `5` | Análisis nuevos por IP y minuto |
 | `BROWSEME_WEB_READS_PER_MINUTE` | `120` | Consultas por IP y minuto |
+| `BROWSEME_VISUAL_MODE` | `auto` (`disabled` en `dev`) | `auto`: dibuja la página con Chrome, Edge o Chromium si están instalados; `disabled`: sin análisis visual |
+| `BROWSEME_BROWSER_PATH` | vacío | Ruta al navegador; vacío = buscarlo en las rutas habituales |
+| `BROWSEME_NO_SANDBOX` | no definida | `true` desactiva el sandbox del navegador (solo para CI con páginas propias) |
 | `BROWSEME_PORT` | `8765` | Puerto de la app de escritorio (perfil `local`) |
 | `BROWSEME_OPEN_BROWSER` | `true` en `local` | Abre el navegador al arrancar la app de escritorio |
 | `VITE_PUBLIC_SITE` (frontend, al compilar) | vacío | `true` = web informativa sin analizador, con descarga |

@@ -27,7 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
  * frontend con su CSP de página y resuelve las rutas del SPA. La IA se
  * desactiva aquí para no depender de un Ollama en la máquina de test.
  */
-@SpringBootTest(properties = {"browseme.ai.mode=disabled", "browseme.desktop.open-browser=false"})
+@SpringBootTest(properties = {"browseme.ai.mode=disabled", "browseme.desktop.open-browser=false",
+        "browseme.visual.mode=disabled"})
 @AutoConfigureMockMvc
 @ActiveProfiles("local")
 class LocalProfileTest {

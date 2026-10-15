@@ -46,6 +46,10 @@ browseme:
     mode: ${BROWSEME_AI_MODE:ollama}
     model: ${BROWSEME_AI_MODEL:llama3.2:3b}
     timeout: ${BROWSEME_AI_TIMEOUT:120s}
+  visual:
+    # auto: usa Chrome, Edge o Chromium si están instalados; disabled: sin análisis visual.
+    mode: ${BROWSEME_VISUAL_MODE:auto}
+    browser-path: ${BROWSEME_BROWSER_PATH:}
   web:
     allowed-origins: ${BROWSEME_ALLOWED_ORIGINS:http://localhost:5173}
     hsts: ${BROWSEME_HSTS:false}

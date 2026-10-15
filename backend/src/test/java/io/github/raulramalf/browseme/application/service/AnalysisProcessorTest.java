@@ -14,6 +14,8 @@ import io.github.raulramalf.browseme.domain.analysis.AnalysisErrorCode;
 import io.github.raulramalf.browseme.domain.analysis.AnalysisStatus;
 import io.github.raulramalf.browseme.domain.analysis.WebsiteAnalysis;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
+import io.github.raulramalf.browseme.domain.page.VisualStatus;
 import io.github.raulramalf.browseme.domain.seo.RuleId;
 import io.github.raulramalf.browseme.domain.seo.SeoIssue;
 import io.github.raulramalf.browseme.domain.seo.SeoRuleEngine;
@@ -52,7 +54,7 @@ class AnalysisProcessorTest {
             }
             return page;
         };
-        AnalysisProcessor processor = new AnalysisProcessor(repository, fetcher, SeoRuleEngine.withDefaultRules(),
+        AnalysisProcessor processor = new AnalysisProcessor(repository, fetcher, url -> VisualCheck.of(VisualStatus.DISABLED), SeoRuleEngine.withDefaultRules(),
                 ai, policy, clock);
         WebsiteAnalysis analysis = WebsiteAnalysis.create(UUID.randomUUID(), policy.parse("http://example.com"),
                 clock.instant(), Duration.ofDays(7));
@@ -163,7 +165,7 @@ class AnalysisProcessorTest {
 
     @Test
     void ignores_analyses_that_are_not_pending() {
-        AnalysisProcessor processor = new AnalysisProcessor(repository, url -> page,
+        AnalysisProcessor processor = new AnalysisProcessor(repository, url -> page, url -> VisualCheck.of(VisualStatus.DISABLED),
                 SeoRuleEngine.withDefaultRules(), ai, policy, clock);
 
         processor.process(UUID.randomUUID());

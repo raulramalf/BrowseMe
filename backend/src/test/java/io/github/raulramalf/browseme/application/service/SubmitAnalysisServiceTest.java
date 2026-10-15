@@ -7,6 +7,8 @@ import io.github.raulramalf.browseme.application.port.in.AnalysisCapacityExceede
 import io.github.raulramalf.browseme.application.port.in.SubmittedAnalysis;
 import io.github.raulramalf.browseme.application.port.out.AiDraft;
 import io.github.raulramalf.browseme.domain.analysis.AnalysisStatus;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
+import io.github.raulramalf.browseme.domain.page.VisualStatus;
 import io.github.raulramalf.browseme.domain.seo.SeoRuleEngine;
 import io.github.raulramalf.browseme.domain.seo.SnapshotFixture;
 import io.github.raulramalf.browseme.domain.url.InvalidUrlException;
@@ -30,7 +32,7 @@ class SubmitAnalysisServiceTest {
     private final List<Runnable> queued = new ArrayList<>();
 
     private SubmitAnalysisService service(Executor executor) {
-        AnalysisProcessor processor = new AnalysisProcessor(repository, url -> SnapshotFixture.perfect().build(),
+        AnalysisProcessor processor = new AnalysisProcessor(repository, url -> SnapshotFixture.perfect().build(), url -> VisualCheck.of(VisualStatus.DISABLED),
                 SeoRuleEngine.withDefaultRules(),
                 input -> new AiDraft("Resumen", List.of(), List.of(), List.of(), List.of()), policy, clock);
         return new SubmitAnalysisService(policy, repository, processor, executor, clock, Duration.ofDays(7));

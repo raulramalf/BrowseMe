@@ -1,6 +1,7 @@
 package io.github.raulramalf.browseme.domain.analysis;
 
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
+import io.github.raulramalf.browseme.domain.page.VisualCheck;
 import io.github.raulramalf.browseme.domain.seo.SeoIssue;
 import io.github.raulramalf.browseme.domain.url.AnalyzedUrl;
 import java.net.URI;
@@ -94,6 +95,12 @@ public final class WebsiteAnalysis {
         this.snapshot = Objects.requireNonNull(pageSnapshot, "pageSnapshot");
         this.finalUrl = pageSnapshot.finalUrl();
         status = AnalysisStatus.ANALYZING;
+    }
+
+    /** Añade el resultado del análisis visual a la página ya descargada. */
+    public void attachVisual(VisualCheck visual) {
+        requireStatus(AnalysisStatus.ANALYZING);
+        this.snapshot = snapshot.withVisual(visual);
     }
 
     public void startInterpreting(List<SeoIssue> detected) {

@@ -5,6 +5,8 @@ import { IssueList } from '../components/IssueList'
 import { formatDate } from '../components/labels'
 import { Limitations } from '../components/Limitations'
 import { PageFacts } from '../components/PageFacts'
+import { ScoreCard } from '../components/ScoreCard'
+import { Screenshots } from '../components/Screenshots'
 import { SeverityCounts } from '../components/SeverityCounts'
 import { StatusView } from '../components/StatusView'
 import { useAnalysisPolling } from '../hooks/useAnalysisPolling'
@@ -61,6 +63,8 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
         <ErrorPanel title="No se pudo completar el análisis" message={analysis.error.message} />
       )}
 
+      {!failed && analysis.score && <ScoreCard score={analysis.score} />}
+
       {hasFacts && (
         <section className="panel panel-facts" aria-labelledby="verificado-titulo">
           <h2 id="verificado-titulo" className="panel-heading">
@@ -71,6 +75,8 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
           {analysis.pageSummary && <PageFacts summary={analysis.pageSummary} />}
         </section>
       )}
+
+      {!failed && analysis.pageSummary && <Screenshots id={analysis.id} visual={analysis.pageSummary.visual} />}
 
       {!failed && <AiSection ai={analysis.ai} />}
 

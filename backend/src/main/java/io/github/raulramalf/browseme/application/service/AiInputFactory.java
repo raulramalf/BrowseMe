@@ -2,7 +2,11 @@ package io.github.raulramalf.browseme.application.service;
 
 import io.github.raulramalf.browseme.application.port.out.AiInput;
 import io.github.raulramalf.browseme.application.port.out.AiInput.IssueSummary;
+import io.github.raulramalf.browseme.domain.page.EngagementSignals;
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
+import io.github.raulramalf.browseme.domain.page.VisualMetrics;
+import io.github.raulramalf.browseme.domain.score.ScoreCalculator;
+import io.github.raulramalf.browseme.domain.score.ScoreCard;
 import io.github.raulramalf.browseme.domain.seo.SeoIssue;
 import java.util.List;
 
@@ -29,11 +33,30 @@ public final class AiInputFactory {
         line(summary, "Enlaces internos/externos", snapshot.links().internal() + "/" + snapshot.links().external());
         line(summary, "Imágenes (total/sin alt)", snapshot.images().total() + "/" + snapshot.images().missingAlt());
         line(summary, "Idioma declarado", snapshot.lang() == null ? "(ninguno)" : snapshot.lang());
+        EngagementSignals e = snapshot.engagement();
+        line(summary, "Contacto (teléfono/email/WhatsApp/formularios)",
+                e.phoneLinks() + "/" + e.emailLinks() + "/" + e.whatsappLinks() + "/" + e.forms());
+        line(summary, "Llamadas a la acción", String.valueOf(e.callsToAction()));
+        line(summary, "Redes sociales enlazadas", e.socialNetworks().isEmpty() ? "(ninguna)"
+                : String.join(", ", e.socialNetworks().stream().sorted().toList()));
+        line(summary, "Opiniones o testimonios", e.testimonials()
+                || e.declaresSchemaType("Review", "AggregateRating") ? "sí" : "no");
+        if (snapshot.visual().done()) {
+            VisualMetrics m = snapshot.visual().metrics();
+            line(summary, "Análisis visual", "hecho en navegador real (móvil " + m.viewportWidth() + " px)");
+            line(summary, "Acción visible en la primera pantalla del móvil",
+                    m.callToActionAboveFoldMobile() ? "sí" : "no");
+        } else {
+            line(summary, "Análisis visual", "no disponible");
+        }
+        ScoreCard score = ScoreCalculator.calculate(issues, snapshot.visual().status());
+        line(summary, "Nota calculada por fórmula (no la cambies)", score.tenths() / 10 + "," + score.tenths() % 10
+                + " de 10");
 
         String bounded = summary.length() > MAX_SUMMARY_CHARS ? summary.substring(0, MAX_SUMMARY_CHARS) : summary.toString();
         List<IssueSummary> summaries = issues.stream()
                 .map(issue -> new IssueSummary(issue.ruleId().name(), issue.category().name(),
-                        issue.severity().name(), truncate(issue.evidence(), MAX_EVIDENCE_CHARS)))
+                        issue.severity().name(), issue.area().name(), truncate(issue.evidence(), MAX_EVIDENCE_CHARS)))
                 .toList();
         return new AiInput(bounded, summaries);
     }

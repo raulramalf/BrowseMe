@@ -83,8 +83,22 @@ class AnalysisApiTest {
                 .andExpect(jsonPath("$.severityCounts.HIGH").value(1))
                 .andExpect(jsonPath("$.ai.status").value("AVAILABLE"))
                 .andExpect(jsonPath("$.ai.summary", containsString("IA simulada")))
-                .andExpect(jsonPath("$.limitations.length()").value(6))
+                .andExpect(jsonPath("$.issues[0].area").value("SEO"))
+                // SEO 10 - 3 (HTTPS) = 7; global 7 × 0,4 + 10 × 0,3 + 10 × 0,3 = 8,8.
+                .andExpect(jsonPath("$.score.value").value(8.8))
+                .andExpect(jsonPath("$.score.areas[0].value").value(7.0))
+                .andExpect(jsonPath("$.score.partial").value(true))
+                .andExpect(jsonPath("$.score.areas[0].area").value("SEO"))
+                .andExpect(jsonPath("$.score.penalties.HIGH").value(3.0))
+                .andExpect(jsonPath("$.pageSummary.visual.status").value("DISABLED"))
+                .andExpect(jsonPath("$.pageSummary.engagement.callsToAction").isNumber())
+                // 6 fijas + 2 por no haber análisis visual + el motivo (desactivado).
+                .andExpect(jsonPath("$.limitations.length()").value(9))
                 .andExpect(jsonPath("$.error").value(nullValue()));
+
+        // Sin análisis visual no hay capturas; un dispositivo desconocido tampoco existe.
+        mvc.perform(get(location + "/screenshots/mobile")).andExpect(status().isNotFound());
+        mvc.perform(get(location + "/screenshots/tablet")).andExpect(status().isNotFound());
     }
 
     @Test

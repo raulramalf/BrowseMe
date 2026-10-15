@@ -1,23 +1,42 @@
 package io.github.raulramalf.browseme.domain.seo;
 
 import io.github.raulramalf.browseme.domain.page.PageSnapshot;
+import io.github.raulramalf.browseme.domain.seo.rules.BusinessDataMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.CallToActionMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.CallToActionNotVisibleMobileRule;
 import io.github.raulramalf.browseme.domain.seo.rules.CanonicalDifferentRule;
 import io.github.raulramalf.browseme.domain.seo.rules.CanonicalMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.ContactMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.EmptyInteractiveRule;
+import io.github.raulramalf.browseme.domain.seo.rules.FaviconMissingRule;
 import io.github.raulramalf.browseme.domain.seo.rules.FetchHttpErrorRule;
+import io.github.raulramalf.browseme.domain.seo.rules.FormLabelsMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.GenericLinkTextRule;
 import io.github.raulramalf.browseme.domain.seo.rules.H1MissingRule;
 import io.github.raulramalf.browseme.domain.seo.rules.H1MultipleRule;
 import io.github.raulramalf.browseme.domain.seo.rules.HeadingSkipRule;
 import io.github.raulramalf.browseme.domain.seo.rules.ImagesNoAltRule;
+import io.github.raulramalf.browseme.domain.seo.rules.ImagesNoDimensionsRule;
 import io.github.raulramalf.browseme.domain.seo.rules.LangMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.LowContrastTextRule;
 import io.github.raulramalf.browseme.domain.seo.rules.MetaDescriptionLengthRule;
 import io.github.raulramalf.browseme.domain.seo.rules.MetaDescriptionMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.MobileHorizontalScrollRule;
+import io.github.raulramalf.browseme.domain.seo.rules.NavigationMissingRule;
 import io.github.raulramalf.browseme.domain.seo.rules.NoindexDetectedRule;
 import io.github.raulramalf.browseme.domain.seo.rules.NotHttpsRule;
 import io.github.raulramalf.browseme.domain.seo.rules.RedirectChainRule;
 import io.github.raulramalf.browseme.domain.seo.rules.RobotsTxtBlocksRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SharePreviewMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SmallTapTargetsRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SmallTextMobileRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SocialLinksMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SocialProofMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.SubscribeMissingRule;
 import io.github.raulramalf.browseme.domain.seo.rules.ThinContentRule;
 import io.github.raulramalf.browseme.domain.seo.rules.TitleLengthRule;
 import io.github.raulramalf.browseme.domain.seo.rules.TitleMissingRule;
+import io.github.raulramalf.browseme.domain.seo.rules.TooManyFontsRule;
 import io.github.raulramalf.browseme.domain.seo.rules.ViewportMissingRule;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -47,7 +66,7 @@ public final class SeoRuleEngine {
         this.rules = List.copyOf(rules);
     }
 
-    /** Motor con el catálogo completo del apartado 5. */
+    /** Motor con el catálogo completo del apartado 5 (SEO, captación y diseño). */
     public static SeoRuleEngine withDefaultRules() {
         return new SeoRuleEngine(List.of(
                 new FetchHttpErrorRule(),
@@ -67,7 +86,29 @@ public final class SeoRuleEngine {
                 new ViewportMissingRule(),
                 new ImagesNoAltRule(),
                 new ThinContentRule(),
-                new RedirectChainRule()));
+                new RedirectChainRule(),
+                // Captación y fidelización
+                new ContactMissingRule(),
+                new CallToActionMissingRule(),
+                new SubscribeMissingRule(),
+                new SocialProofMissingRule(),
+                new SocialLinksMissingRule(),
+                new BusinessDataMissingRule(),
+                new SharePreviewMissingRule(),
+                // Diseño: estructura del HTML
+                new NavigationMissingRule(),
+                new GenericLinkTextRule(),
+                new EmptyInteractiveRule(),
+                new FormLabelsMissingRule(),
+                new ImagesNoDimensionsRule(),
+                new FaviconMissingRule(),
+                // Diseño: página dibujada (solo si hubo análisis visual)
+                new MobileHorizontalScrollRule(),
+                new LowContrastTextRule(),
+                new SmallTapTargetsRule(),
+                new SmallTextMobileRule(),
+                new CallToActionNotVisibleMobileRule(),
+                new TooManyFontsRule()));
     }
 
     public List<SeoIssue> evaluate(PageSnapshot snapshot) {

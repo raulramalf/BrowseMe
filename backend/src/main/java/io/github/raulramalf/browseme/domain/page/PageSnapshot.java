@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
  *
  * @param canonical         valor literal del {@code href} canónico, sin interpretar
  * @param robotsDirectives  directivas de {@code meta robots} y {@code X-Robots-Tag}, en minúsculas
+ * @param engagement        señales de captación y fidelización; nunca {@code null}
+ * @param design            patrones de diseño del HTML; nunca {@code null}
+ * @param visual            análisis visual con navegador real; nunca {@code null}
  */
 public record PageSnapshot(
         URI requestedUrl,
@@ -33,7 +36,10 @@ public record PageSnapshot(
         ImageStats images,
         boolean viewportPresent,
         int visibleWordCount,
-        RobotsTxtStatus robotsTxt) {
+        RobotsTxtStatus robotsTxt,
+        EngagementSignals engagement,
+        DesignSignals design,
+        VisualCheck visual) {
 
     public static final int MAX_TITLE_LENGTH = 300;
     public static final int MAX_META_DESCRIPTION_LENGTH = 500;
@@ -65,6 +71,17 @@ public record PageSnapshot(
                 .limit(MAX_ROBOTS_DIRECTIVES)
                 .collect(Collectors.toUnmodifiableSet());
         headings = headings == null ? List.of() : List.copyOf(headings.subList(0, Math.min(headings.size(), MAX_HEADINGS)));
+        // null en análisis guardados antes de que existieran estos datos.
+        engagement = engagement == null ? EngagementSignals.none() : engagement;
+        design = design == null ? DesignSignals.none() : design;
+        visual = visual == null ? VisualCheck.notRun() : visual;
+    }
+
+    /** Copia con el resultado del análisis visual. */
+    public PageSnapshot withVisual(VisualCheck check) {
+        return new PageSnapshot(requestedUrl, finalUrl, httpStatus, redirectCount, title, metaDescription, lang,
+                canonical, robotsDirectives, headings, links, images, viewportPresent, visibleWordCount, robotsTxt,
+                engagement, design, Objects.requireNonNull(check, "check"));
     }
 
     /** Si la URL final, tras redirecciones, se sirve por HTTPS. */

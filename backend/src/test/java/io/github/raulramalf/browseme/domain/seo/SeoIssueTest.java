@@ -33,7 +33,8 @@ class SeoIssueTest {
 
     @Test
     void catalog_matches_the_specification() {
-        assertThat(RuleId.values()).hasSize(18);
+        // 18 de SEO, 7 de captación y fidelización, 6 de diseño del HTML y 6 de diseño visual.
+        assertThat(RuleId.values()).hasSize(37);
         assertThat(RuleId.NOINDEX_DETECTED.severity()).isEqualTo(IssueSeverity.HIGH);
         assertThat(RuleId.H1_MULTIPLE.category()).isEqualTo(IssueCategory.EDITORIAL);
         assertThat(RuleId.H1_MULTIPLE.severity()).isEqualTo(IssueSeverity.INFO);
