@@ -26,6 +26,12 @@
   --on-dark-muted: rgba(255, 255, 255, 0.72);
   --on-dark-line: rgba(255, 255, 255, 0.14);
 
+  /* Filetes de 1 px que perfilan las tarjetas sin sombras pesadas */
+  --hairline-dark: rgba(255, 255, 255, 0.08);
+  --hairline-dark-strong: rgba(255, 255, 255, 0.16);
+  --hairline-light: rgba(19, 35, 34, 0.08);
+  --hairline-light-strong: #dde3e2;
+
   /*
    * Severidad: única excepción a «sin colores nuevos». El rojo es necesario
    * para que la severidad alta no dependa solo del texto. Siempre acompaña
@@ -71,8 +77,8 @@
   --page-max-width: 1200px;
   --section-gap: 80px;
   --radius-pill: 56px;
-  --radius-cards: 20px;
-  --radius-largecards: 60px;
+  --radius-cards: 16px;
+  --radius-largecards: 28px;
   --radius-small: 10px;
   --shadow-md: rgba(0, 0, 0, 0.04) 1px 0px 9px 2px;
 
@@ -442,6 +448,7 @@ select {
 .prose {
   background: var(--color-mint-frost);
   color: var(--color-obsidian-shell);
+  border: 1px solid var(--hairline-light);
   border-radius: var(--radius-largecards);
   padding: var(--spacing-48);
   box-shadow: var(--shadow-md);
@@ -453,6 +460,7 @@ select {
 .panel-dark {
   background: var(--color-deep-abyss);
   color: var(--color-pure-white);
+  border: 1px solid var(--hairline-dark);
   border-radius: var(--radius-largecards);
   padding: var(--spacing-48);
   margin: var(--spacing-32) 0;
@@ -517,6 +525,7 @@ select {
 }
 
 .notice {
+  border: 1px solid var(--hairline-dark);
   background: var(--color-deep-abyss);
   color: var(--on-dark-muted);
   border-radius: var(--radius-cards);
@@ -573,77 +582,6 @@ select {
   }
 }
 
-/* Ilustración decorativa de módulos apilados */
-.hero-art {
-  position: relative;
-  display: grid;
-  gap: var(--spacing-16);
-  padding: var(--spacing-32);
-  background: var(--color-deep-abyss);
-  border-radius: var(--radius-largecards);
-}
-
-.hero-art-module {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-16);
-  padding: 18px 24px;
-  border-radius: var(--radius-cards);
-  color: var(--color-obsidian-shell);
-  box-shadow: var(--shadow-md);
-}
-
-.hero-art-module:nth-child(2) {
-  margin-left: var(--spacing-32);
-}
-
-.hero-art-module:nth-child(3) {
-  margin-left: var(--spacing-64);
-}
-
-.hero-art-index {
-  font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  opacity: 0.75;
-}
-
-.hero-art-title {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.hero-art-sub {
-  display: block;
-  font-size: var(--text-body-sm);
-  opacity: 0.8;
-}
-
-.hero-art-white {
-  background: var(--color-pure-white);
-}
-
-.hero-art-mint {
-  background: var(--color-mint-whisper);
-}
-
-.hero-art-yellow {
-  background: var(--color-signal-yellow);
-}
-
-@media (max-width: 480px) {
-  .hero-art {
-    padding: var(--spacing-16);
-  }
-
-  .hero-art-module:nth-child(2),
-  .hero-art-module:nth-child(3) {
-    margin-left: 0;
-  }
-}
-
 /* Fila de cifras */
 .stats {
   display: grid;
@@ -652,8 +590,24 @@ select {
   list-style: none;
   margin: 0;
   padding: var(--spacing-32) 0;
-  border-top: 1px solid var(--on-dark-line);
-  border-bottom: 1px solid var(--on-dark-line);
+  border-top: 1px solid var(--hairline-dark);
+  border-bottom: 1px solid var(--hairline-dark);
+}
+
+.stats li + li {
+  padding-left: var(--spacing-24);
+  border-left: 1px solid var(--hairline-dark);
+}
+
+@media (max-width: 820px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats li + li {
+    padding-left: 0;
+    border-left: none;
+  }
 }
 
 .stat-number {
@@ -701,8 +655,9 @@ select {
 
 .step-card {
   background: var(--color-pure-white);
+  border: 1px solid var(--hairline-light-strong);
   border-radius: var(--radius-cards);
-  padding: var(--spacing-24);
+  padding: var(--spacing-32) var(--spacing-24);
 }
 
 .step-card h3 {
@@ -718,12 +673,14 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-small);
   background: var(--color-obsidian-shell);
   color: var(--color-pure-white);
   font-family: var(--font-display);
+  font-size: var(--text-body-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 .two-columns {
@@ -745,28 +702,35 @@ select {
 
 .check-list li {
   position: relative;
-  padding: 12px 0 12px 32px;
-  border-top: 1px solid var(--on-dark-line);
+  padding: 14px 0 14px 36px;
+  border-top: 1px solid var(--hairline-dark);
 }
 
 .check-list li:first-child {
   border-top: none;
 }
 
+/* Marca de verificación dibujada con bordes (sin imágenes). */
 .check-list li::before {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 21px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-mint-whisper);
+  left: 7px;
+  top: 17px;
+  width: 6px;
+  height: 11px;
+  border-right: 2px solid var(--color-mint-whisper);
+  border-bottom: 2px solid var(--color-mint-whisper);
+  transform: rotate(45deg);
 }
 
 .check-list.is-limit li::before {
-  background: transparent;
-  border: 1.5px solid var(--on-dark-muted);
+  left: 4px;
+  top: 25px;
+  width: 12px;
+  height: 0;
+  border-right: none;
+  border-bottom: 2px solid var(--on-dark-muted);
+  transform: none;
 }
 
 /* ---------- Informe ---------- */
@@ -804,7 +768,7 @@ select {
 .badge {
   display: inline-block;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.4;
@@ -865,18 +829,33 @@ select {
 }
 
 .sev {
+  background: var(--color-pure-white);
+  color: var(--color-obsidian-shell);
+  border: 1px solid var(--hairline-light-strong);
   border-radius: var(--radius-cards);
-  padding: var(--spacing-16) var(--spacing-24);
+  padding: var(--spacing-16) var(--spacing-24) var(--spacing-24);
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  gap: var(--spacing-8);
 }
 
-.sev-info.sev {
-  border: 1px solid var(--color-fog-border);
+.sev-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sev-label::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sev-accent, var(--color-stone-border));
 }
 
 .sev-count {
   font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-heading);
   font-weight: 500;
   line-height: 1.1;
@@ -902,11 +881,13 @@ select {
   margin: 0;
 }
 
+/* Hallazgo: tarjeta blanca con filete y franja fina del color de severidad. */
 .issue {
   background: var(--color-pure-white);
-  border-left: 6px solid var(--color-fog-border);
+  border: 1px solid var(--hairline-light-strong);
   border-radius: var(--radius-cards);
-  padding: var(--spacing-24);
+  box-shadow: inset 3px 0 0 var(--sev-accent, var(--color-stone-border));
+  padding: var(--spacing-24) var(--spacing-24) var(--spacing-24) var(--spacing-32);
   margin-bottom: 12px;
   overflow-wrap: anywhere;
 }
@@ -920,20 +901,24 @@ select {
   margin: 0 0 12px;
 }
 
-.sev-border-high {
-  border-left-color: var(--high-accent);
+.sev-border-high,
+.sev-dot-high {
+  --sev-accent: var(--high-accent);
 }
 
-.sev-border-medium {
-  border-left-color: var(--color-signal-yellow);
+.sev-border-medium,
+.sev-dot-medium {
+  --sev-accent: var(--color-signal-yellow);
 }
 
-.sev-border-low {
-  border-left-color: var(--color-mint-whisper);
+.sev-border-low,
+.sev-dot-low {
+  --sev-accent: #5fc596;
 }
 
-.sev-border-info {
-  border-left-color: var(--color-stone-border);
+.sev-border-info,
+.sev-dot-info {
+  --sev-accent: var(--color-stone-border);
 }
 
 .issue-meta {
@@ -1112,6 +1097,7 @@ dl dd {
 .preview {
   margin: 0;
   background: var(--color-deep-abyss);
+  border: 1px solid var(--hairline-dark);
   border-radius: var(--radius-largecards);
   padding: var(--spacing-24);
 }
@@ -1169,8 +1155,8 @@ dl dd {
   display: grid;
   gap: 2px;
   background: var(--color-pure-white);
-  border-left-width: 5px;
-  border-left-style: solid;
+  border: 1px solid var(--hairline-light-strong);
+  box-shadow: inset 3px 0 0 var(--sev-accent, var(--color-stone-border));
   border-radius: var(--radius-small);
   padding: 12px 16px;
   font-size: var(--text-body-sm);
@@ -1217,8 +1203,31 @@ dl dd {
 
 .feature-tile {
   background: var(--color-deep-abyss);
+  border: 1px solid var(--hairline-dark);
   border-radius: var(--radius-cards);
   padding: var(--spacing-32) var(--spacing-24);
+  transition: border-color 0.2s ease;
+}
+
+.feature-tile:hover {
+  border-color: var(--hairline-dark-strong);
+}
+
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--spacing-24);
+  border: 1px solid var(--hairline-dark-strong);
+  border-radius: var(--radius-small);
+  color: var(--color-mint-whisper);
+}
+
+.feature-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .feature-tile .eyebrow {
@@ -1242,6 +1251,7 @@ dl dd {
 .cta-band {
   text-align: center;
   background: var(--color-deep-abyss);
+  border: 1px solid var(--hairline-dark);
   border-radius: var(--radius-largecards);
   padding: var(--spacing-64) var(--spacing-24);
 }
