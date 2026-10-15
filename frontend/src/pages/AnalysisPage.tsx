@@ -43,6 +43,9 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
   }
 
   const failed = analysis.status === 'FAILED'
+  // Si la página no llegó a analizarse, no hay hechos que mostrar: decir
+  // «no hay problemas» sería afirmar algo que no se ha comprobado.
+  const hasFacts = !failed || analysis.issues.length > 0 || analysis.pageSummary !== null
   return (
     <article className="report" aria-labelledby="informe-titulo">
       <header className="report-header">
@@ -58,14 +61,16 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
         <ErrorPanel title="No se pudo completar el análisis" message={analysis.error.message} />
       )}
 
-      <section className="panel panel-facts" aria-labelledby="verificado-titulo">
-        <h2 id="verificado-titulo" className="panel-heading">
-          Verificado por reglas <span className="badge badge-facts">Comprobado automáticamente</span>
-        </h2>
-        <SeverityCounts counts={analysis.severityCounts} />
-        <IssueList issues={analysis.issues} />
-        {analysis.pageSummary && <PageFacts summary={analysis.pageSummary} />}
-      </section>
+      {hasFacts && (
+        <section className="panel panel-facts" aria-labelledby="verificado-titulo">
+          <h2 id="verificado-titulo" className="panel-heading">
+            Verificado por reglas <span className="badge badge-facts">Comprobado automáticamente</span>
+          </h2>
+          <SeverityCounts counts={analysis.severityCounts} />
+          <IssueList issues={analysis.issues} />
+          {analysis.pageSummary && <PageFacts summary={analysis.pageSummary} />}
+        </section>
+      )}
 
       {!failed && <AiSection ai={analysis.ai} />}
 

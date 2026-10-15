@@ -88,6 +88,8 @@ describe('AnalysisPage', () => {
 
     expect(await screen.findByText('La web tardó demasiado en responder.')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /Interpretación de IA/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /Verificado por reglas/ })).not.toBeInTheDocument()
+    expect(screen.queryByText(/no han encontrado problemas/)).not.toBeInTheDocument()
   })
 
   it('shows not found for unknown or expired analyses', async () => {
