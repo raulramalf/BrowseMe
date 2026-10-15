@@ -46,6 +46,7 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
   return (
     <article className="report" aria-labelledby="informe-titulo">
       <header className="report-header">
+        <span className="eyebrow">Informe · Una página analizada</span>
         <h1 id="informe-titulo">Informe SEO</h1>
         <p className="url-text">{analysis.finalUrl ?? analysis.requestedUrl}</p>
         <p className="meta">
@@ -58,7 +59,7 @@ export function AnalysisPage({ pollIntervalMs }: { pollIntervalMs?: number }) {
       )}
 
       <section className="panel panel-facts" aria-labelledby="verificado-titulo">
-        <h2 id="verificado-titulo">
+        <h2 id="verificado-titulo" className="panel-heading">
           Verificado por reglas <span className="badge badge-facts">Comprobado automáticamente</span>
         </h2>
         <SeverityCounts counts={analysis.severityCounts} />
