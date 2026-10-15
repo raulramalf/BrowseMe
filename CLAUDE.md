@@ -23,5 +23,7 @@ los hallazgos. Contexto completo en docs/PROMPT_DESARROLLO.md.
 - Backend (desde `backend/`): `./mvnw test`, `./mvnw verify`
   - En esta máquina el JDK está en `~/.local/opt/jdk-25.0.4.1+1` (fuera del PATH):
     `export JAVA_HOME=~/.local/opt/jdk-25.0.4.1+1` antes de `./mvnw`.
-- Frontend: `npm test`, `npm run build`
-- Entorno completo: `docker compose up`
+- Backend en modo desarrollo (memoria + IA simulada): `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
+- Frontend (desde `frontend/`): `npm test`, `npm run build`, `npm run dev` (puerto 5173, proxy de /api al 8080)
+  - En esta máquina Node está en `~/.local/opt/node-v24.22.0-linux-x64/bin` (fuera del PATH).
+- Entorno completo: `cp .env.example .env` y `docker compose up --build` (en esta máquina no hay Docker).

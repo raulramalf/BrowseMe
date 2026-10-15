@@ -34,6 +34,9 @@ eligen siempre versiones **estables** (sin alpha/beta/RC/milestone).
 | TypeScript | **6.0.3** | npm; plantilla oficial `create-vite` react-ts usa `~6.0.2` | 7.0.2 es `latest` (compilador nativo), pero la plantilla oficial de Vite aún fija 6.0; seguimos a la plantilla |
 | Vitest | **5.0.4** | npm | Peer: vite ^6 \|\| ^7 \|\| ^8 |
 | @testing-library/react | **16.3.3** | npm | Peer: React 18/19, `@testing-library/dom` ^10 |
+| @testing-library/dom / jest-dom / user-event | 10.4.2 / 7.0.1 / 14.6.8 | npm (instaladas 2026-10-15) | |
+| jsdom | 30.1.2 | npm | Entorno de Vitest |
+| @types/react / @types/react-dom | 19.3.0 | npm | |
 | React Router | **7.18.4** (`react-router`) | npm | Confirmada. En la v7 `react-router-dom` solo reexporta `react-router`; se usa este directamente |
 
 ## Infraestructura
@@ -51,3 +54,14 @@ eligen siempre versiones **estables** (sin alpha/beta/RC/milestone).
 | Maven (vía wrapper) | 3.9.16 | Maven Central (`maven-core`) |
 | maven-wrapper-plugin | 3.3.4 | Maven Central |
 | Surefire / Failsafe | 3.5.6 | gestionadas por Boot 4.1.1 |
+
+## Imágenes Docker y CI (comprobadas en Docker Hub y GitHub el 2026-10-15)
+
+| Componente | Versión |
+|---|---|
+| Build backend / runtime | `eclipse-temurin:25-jdk-alpine` / `eclipse-temurin:25-jre-alpine` |
+| Build frontend | `node:24.22.0-alpine` |
+| Servidor web | `nginx:1.30.6-alpine` (rama estable) |
+| Base de datos | `postgres:18.6-alpine` |
+| IA | `ollama/ollama:0.40.4` |
+| GitHub Actions | `actions/checkout@v7`, `actions/setup-java@v6`, `actions/setup-node@v7` |
