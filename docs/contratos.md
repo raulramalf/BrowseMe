@@ -134,7 +134,7 @@ public interface PageFetcher {
 }
 
 public interface AiInterpreter {
-    AiInterpretation interpret(AiInput input);
+    AiDraft interpret(AiInput input);   // borrador sin validar: ruleIds como texto, campos opcionales
     // Errores: AiUnavailableException (caído, timeout), AiInvalidOutputException (JSON roto o fuera de esquema)
 }
 public record AiInput(String pageSummary, List<SeoIssue> issues) {}
@@ -143,6 +143,7 @@ public record AiInput(String pageSummary, List<SeoIssue> issues) {}
 
 public interface AnalysisRepository {
     void save(WebsiteAnalysis analysis);                    // bloqueo optimista por versión
+    void delete(UUID id);                                   // deshace un alta si la cola rechaza el trabajo
     Optional<WebsiteAnalysis> findById(UUID id);
     List<WebsiteAnalysis> findByStatusIn(Set<AnalysisStatus> statuses); // arranque: atascados -> FAILED
     int deleteExpired(Instant now);
