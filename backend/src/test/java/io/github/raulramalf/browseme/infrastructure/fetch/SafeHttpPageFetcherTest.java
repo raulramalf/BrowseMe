@@ -55,12 +55,15 @@ class SafeHttpPageFetcherTest {
     private static final InetAddress PUBLIC_IP = ip("93.184.215.14");
     private static final InetAddress OTHER_PUBLIC_IP = ip("93.184.215.15");
     private static final InetAddress PRIVATE_IP = ip("10.0.0.5");
+    /** IPv6 pública a la que la red de pruebas «no llega», como en una red sin salida IPv6. */
+    private static final InetAddress UNREACHABLE_IPV6 = ip("2606:4700::1");
 
     private static final Map<String, List<InetAddress>> DNS = Map.of(
             "web.example", List.of(PUBLIC_IP),
             "otra.example", List.of(OTHER_PUBLIC_IP),
             "interno.example", List.of(PRIVATE_IP),
             "mixto.example", List.of(PUBLIC_IP, ip("127.0.0.1")),
+            "dual.example", List.of(UNREACHABLE_IPV6, PUBLIC_IP),
             "metadatos.example", List.of(ip("169.254.169.254")),
             "ipv6local.example", List.of(ip("fd00::1")));
 
@@ -329,6 +332,29 @@ class SafeHttpPageFetcherTest {
         }
 
         @Test
+        void falls_back_to_the_next_validated_address_when_one_is_unreachable() {
+            stub("dual.example", "/", html("<title>Por IPv4</title>"));
+
+            PageSnapshot snapshot = fetch("http://dual.example/");
+
+            assertThat(snapshot.title()).isEqualTo("Por IPv4");
+            assertThat(sockets.attempts()).contains(UNREACHABLE_IPV6, PUBLIC_IP);
+        }
+
+        @Test
+        void never_reuses_a_connection_between_requests() {
+            stub("web.example", "/robots.txt", aResponse().withStatus(404).withBody("x".repeat(5000)));
+            stub("web.example", "/", redirect("/fin"));
+            stub("web.example", "/fin", html("<title>Fin</title>"));
+
+            fetch("http://web.example/");
+
+            // robots.txt, la página y la redirección: una conexión nueva para cada una.
+            assertThat(sockets.attempts()).hasSize(3);
+            wireMock.verify(getRequestedFor(urlEqualTo("/fin")).withHeader("Connection", equalTo("close")));
+        }
+
+        @Test
         void reports_unknown_hosts() {
             assertFailsWith(() -> fetch("http://no-existe.example/"), AnalysisErrorCode.DNS_FAILURE);
         }
@@ -492,7 +518,11 @@ class SafeHttpPageFetcherTest {
             return new Socket() {
                 @Override
                 public void connect(SocketAddress endpoint, int timeout) throws IOException {
-                    attempts.add(((InetSocketAddress) endpoint).getAddress());
+                    InetAddress target = ((InetSocketAddress) endpoint).getAddress();
+                    attempts.add(target);
+                    if (target.equals(UNREACHABLE_IPV6)) {
+                        throw new java.net.SocketException("Network is unreachable");
+                    }
                     super.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), targetPort), timeout);
                 }
             };

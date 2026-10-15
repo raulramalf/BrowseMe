@@ -1,0 +1,17 @@
+# Perfil de desarrollo: sin PostgreSQL ni Ollama. Repositorio en memoria e IA
+# simulada (BROWSEME_AI_MODE=ollama para probar con un Ollama local).
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
+      - org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+
+browseme:
+  persistence: memory
+  ai:
+    mode: ${BROWSEME_AI_MODE:fake}
+  web:
+    allowed-origins: http://localhost:5173

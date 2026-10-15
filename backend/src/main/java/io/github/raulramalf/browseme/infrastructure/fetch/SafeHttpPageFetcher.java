@@ -82,7 +82,9 @@ public class SafeHttpPageFetcher implements PageFetcher {
                 .proxy(Proxy.NO_PROXY)
                 .followRedirects(false)
                 .followSslRedirects(false)
-                .retryOnConnectionFailure(false)
+                // Permite probar la siguiente IP ya validada si una no es alcanzable (p. ej. IPv6
+                // sin salida). No vuelve a resolver DNS y el interceptor valida cada conexión.
+                .retryOnConnectionFailure(true)
                 // Sin reutilizar conexiones: cada salto vuelve a pasar por DNS y validación.
                 .connectionPool(new ConnectionPool(0, 1, TimeUnit.SECONDS))
                 .connectTimeout(limits.connectTimeout())
@@ -255,6 +257,9 @@ public class SafeHttpPageFetcher implements PageFetcher {
                 .header("User-Agent", userAgent)
                 .header("Accept", accept)
                 .header("Accept-Language", "es,en;q=0.5")
+                // Cada petición en su propia conexión: nunca se reutiliza un socket con restos
+                // de una respuesta anterior ni se salta la validación de DNS de un salto.
+                .header("Connection", "close")
                 .get()
                 .build();
     }

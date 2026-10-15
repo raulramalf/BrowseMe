@@ -1,14 +1,51 @@
+# Configuración por defecto (producción). Todo se puede sobrescribir con
+# variables de entorno; ver la tabla del README y .env.example.
 spring:
   application:
     name: browseme
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/browseme}
+    username: ${SPRING_DATASOURCE_USERNAME:browseme}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      init:
+        pull-model-strategy: never
+    retry:
+      # Un solo intento: si Ollama falla, el análisis sigue sin IA en vez de esperar reintentos.
+      max-attempts: 1
 
 server:
+  # Detrás de nginx: se toma la IP del cliente de X-Forwarded-For solo si el proxy es de red interna.
+  forward-headers-strategy: native
   error:
     include-stacktrace: never
     include-message: never
+    include-exception: false
+    whitelabel:
+      enabled: false
 
 management:
   endpoints:
     web:
       exposure:
         include: health
+  endpoint:
+    health:
+      show-details: never
+
+browseme:
+  retention: P7D
+  persistence: jpa
+  ai:
+    mode: ${BROWSEME_AI_MODE:ollama}
+    model: ${BROWSEME_AI_MODEL:llama3.2:3b}
+    timeout: ${BROWSEME_AI_TIMEOUT:120s}
+  web:
+    allowed-origins: ${BROWSEME_ALLOWED_ORIGINS:http://localhost:5173}
+    hsts: ${BROWSEME_HSTS:false}
